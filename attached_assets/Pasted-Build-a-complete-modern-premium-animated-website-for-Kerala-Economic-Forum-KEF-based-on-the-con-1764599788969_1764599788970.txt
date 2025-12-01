@@ -1,0 +1,654 @@
+Build a complete, modern, premium, animated website for Kerala Economic Forum (KEF) based on the content below.
+The website must feel unique, stylish, premium, startup-inspired, and far different from any template-based UI.
+
+Use Firebase for authentication (email/password + Google sign-in).
+Use clean, optimized code (React + Vite + Tailwind recommended).
+
+🎨 DESIGN REQUIREMENTS
+Overall style
+
+Modern
+
+Premium
+
+Futuristic
+
+Youthful + business vibe
+
+Kerala-inspired micro-elements
+
+Strong visual hierarchy
+
+Glassmorphism + Neumorphism blends
+
+Subtle gradients matching KEF colors (red, blue, yellow, charcoal)
+
+UI Design Style
+
+Use:
+
+large hero sections
+
+smooth rounded components
+
+floating cards
+
+subtle glossy highlights
+
+soft shadow depth
+
+gradient strokes
+
+curved sections (wave transitions between sections)
+
+Animations + Transitions
+
+Include LOTS of subtle, classy micro-interactions:
+
+fade-in while scrolling
+
+slide-in from top / left / right
+
+parallax background movement
+
+floating elements
+
+hover glow effects
+
+staggered reveal for text
+
+metric counters
+
+animated icon lines
+
+smooth anchor scroll
+
+animated page transitions
+
+hover-lift cards
+
+3D tilt effect on hero cards
+
+Animations must be smooth, premium and not cartoonish.
+
+Background & Empty Space Enhancements
+
+Add minimal micro-designs inspired by:
+
+Kerala waves
+
+Coconut leaves (line art)
+
+Modern business icons
+
+Dotted patterns
+
+Abstract geometric shapes
+
+Glowing particles
+
+Keep them very subtle (opacity 0.05–0.1).
+
+🔥 FUNCTIONAL REQUIREMENTS
+Firebase Integration
+
+Include:
+
+Firebase initialization
+
+Sign-in / sign-up components
+
+Google OAuth button
+
+Protected routes
+
+User dashboard placeholder
+
+Navigation
+
+Smooth sticky navbar with active link animations.
+
+Mobile Responsiveness
+
+Must look premium and clean on phones.
+
+📘 USE THIS CONTENT FOR THE WEBSITE STRUCTURE
+________________________________________
+🌐 KERALA ECONOMIC FORUM — COMPLETE WEBSITE CONTENT PLAN (WORD-FOR-WORD)
+Style: Youthful, energetic, startup-themed
+Tone: Powerful, inspiring, clear, human
+Structure: 10 pages + subpages
+________________________________________
+----------------------------------------
+PAGE 1: HOME PAGE (FULL CONTENT)
+----------------------------------------
+SECTION 1 — HERO / TOP BANNER
+Headline:
+Where Kerala’s Entrepreneurs Rise Together
+Subheadline:
+A statewide non-profit movement empowering entrepreneurs, startups, students, institutions, and innovators to build, grow, and transform Kerala’s economic future.
+Buttons:
+•	Join the Forum
+•	Explore Our Programs
+•	Partner With Us
+Short tagline:
+Where ideas grow. Where founders rise. Where Kerala transforms.
+________________________________________
+SECTION 2 — QUICK INTRO
+Title:
+Welcome to Kerala Economic Forum
+Body:
+Kerala Economic Forum (KEF) is a non-profit organisation dedicated to building a strong entrepreneurial ecosystem across Kerala.
+We bring together entrepreneurs, students, institutions, experts, investors, and thought leaders to create opportunities, build networks, and support new ideas.
+Our mission is to help Kerala become a leading hub for startups, innovation, and economic development.
+Button: → Learn More About Us
+________________________________________
+SECTION 3 — WHAT WE FOCUS ON (4–6 ICONS)
+Title:
+What We Do
+Text:
+We empower Kerala’s entrepreneurial community through:
+•	Startup Support & Mentoring
+•	Funding & Investor Connect
+•	Campus Entrepreneurship Programs
+•	Business Conclaves & Networking Summits
+•	Advisory & Skill Development
+•	Local Entrepreneur Development
+________________________________________
+SECTION 4 — SIGNATURE PROGRAMS
+Title:
+Our Signature Programs
+Programs (each with 2–3 lines):
+Startup Boot Camp
+Business Conclaves
+Founder Circle Meets
+Startup Advisory Clinics
+Campus Innovation Labs
+Button: → View All Programs
+________________________________________
+SECTION 5 — IMPACT HIGHLIGHTS
+Title:
+Our Vision. Our Impact. Our Future.
+Metrics (animated numbers):
+•	2,000+ Startups to be supported
+•	10,000+ Entrepreneurs in our network
+•	200+ Campus partnerships
+•	100+ Events in pipeline
+•	₹100+ crore Funding enablement target
+________________________________________
+SECTION 6 — UPCOMING EVENTS
+Title:
+Upcoming Events
+Sample events:
+Kerala Startup Fest – January
+Two-day power-packed festival with 1000+ student entrepreneurs, investors, experts, workshops, and real-time pitch battles.
+KEF Founder Roundtable
+Closed-door networking session for selected founders and business leaders.
+Startup Boot Camp
+Residential Statup Camp
+Button: → Explore All Events
+________________________________________
+SECTION 7 — PARTNERS
+Title:
+Our Partners & Collaborators
+Text:
+We collaborate with institutions, corporates, incubators, accelerators, and industry leaders to build Kerala’s entrepreneurial ecosystem.
+Button: → Partner With Us
+________________________________________
+SECTION 8 — FOOTER
+Links to all pages + contact + social media.
+________________________________________
+----------------------------------------
+PAGE 2: ABOUT US 
+----------------------------------------
+SECTION 1 — WHO WE ARE
+Title:
+About Kerala Economic Forum
+Body:
+Kerala Economic Forum (KEF) is a non-profit movement formed with a single mission:
+to uplift Kerala’s entrepreneurial landscape by building a powerful, interconnected ecosystem where entrepreneurs, students, professionals, institutions, and investors can grow together.
+We exist to help Kerala move forward—economically, socially, and technologically—through innovation, entrepreneurship, collaboration, and opportunities for all.
+________________________________________
+SECTION 2 — OUR VISION
+Title:
+Our Vision
+Text:
+To position Kerala as a globally recognised entrepreneurial state where every aspiring founder receives the support, network, and resources needed to build and scale meaningful businesses.
+________________________________________
+SECTION 3 — OUR MISSION
+Title:
+Our Mission
+Bullet points:
+•	To empower startups at every stage—from idea to scale
+•	To build Kerala’s largest interconnected entrepreneur community
+•	To strengthen student entrepreneurship and campus innovation
+•	To conduct transformative business events and conclaves
+•	To offer continuous business advisory and expert mentorship
+•	To connect entrepreneurs with angel investors and venture capital
+•	To support local and rural businesses with branding and market access
+•	To promote collaboration, partnerships, and growth opportunities
+•	To provide economic insights and policy recommendations
+________________________________________
+SECTION 4 — OUR CORE OBJECTIVES
+List all 10 objectives, each with 2–3 lines.
+________________________________________
+SECTION 5 — WHY KERALA NEEDS KEF
+Explain:
+•	Kerala’s youth talent
+•	Lack of unified ecosystem
+•	Difficulty accessing investors
+•	Campus ideas not converting to startups
+•	Need for networks and mentoring
+•	Economic upliftment potential
+________________________________________
+SECTION 6 — LEADERSHIP TEAM
+Photos + 3-line bios for:
+•	Founder / Board
+•	Advisors
+•	Mentors
+________________________________________
+----------------------------------------
+PAGE 3: PROGRAMS (FULL CONTENT)
+----------------------------------------
+INTRO
+Title:
+Our Programs
+Text:
+We offer a range of programs designed to empower entrepreneurs, students, businesses, and institutions. Each program is crafted to create real impact, practical learning, and meaningful opportunities.
+________________________________________
+A. STARTUP BOOT CAMP
+Section Title:
+Startup Boot Camp — Transforming Mindsets
+Paragraph:
+Both residential and Day camps where participants learn to think like entrepreneurs. The camp includes powerful workshops, business model creation, idea validation, field assignments, pitching sessions, and mentor interactions.
+
+
+Who can join: Students, founders, aspirants
+Outcome: Mindset → Idea → Action → Pitch
+________________________________________
+B. BUSINESS CONCLAVES
+Large-scale gatherings where founders, investors, mentors, thought leaders, and students connect and collaborate.
+Explain in detail:
+•	Purpose
+•	Who attends
+•	Format
+•	Opportunities created
+________________________________________
+C. ENTREPRENEURSHIP ACCELERATOR
+Full description
+Curriculum
+Outcome
+Mentorship
+Demo day
+________________________________________
+D. FOUNDER CIRCLES
+Exclusive curated networking dinners and tea sessions bringing entrepreneurs and experts for honest conversations and opportunities.
+________________________________________
+E. ADVISORY CLINICS
+•	One-on-one mentoring and business advisory sessions in finance, branding, HR, legal, marketing, and operations.
+
+Areas covered:
+•	Finance
+•	Branding
+•	Marketing
+•	HR
+•	Operations
+•	Strategy
+•	Compliance
+________________________________________
+F. CAMPUS INNOVATION LABS
+Building entrepreneurship clubs, innovation cells, startup labs, and student incubators in colleges across Kerala.
+
+Explain how KEF builds entrepreneurship inside institutions.
+________________________________________
+G. KEF STUDENT ENTREPRENEURS FORUM
+Explain mission, benefits, how to join.
+________________________________________
+----------------------------------------
+PAGE 4: STARTUP SUPPORT
+----------------------------------------
+INTRO
+Title:
+Startup Support & Advisory
+Text:
+We help startups at every stage—validation, creation, launch, growth, and scaling.
+________________________________________
+A. BUSINESS ADVISORY
+Branding Support
+Full explanation
+Logo, identity, positioning
+Financial Advisory
+Cash flow, projections, costing, unit economics
+Marketing Advisory
+Digital marketing, strategy, customer outreach
+Legal & Compliance Guidance
+Business structure, registrations, basics
+HR & Team Building
+Hiring, team culture, training
+Operational Consulting
+Workflow, systems, automation
+________________________________________
+B. FUNDING SUPPORT
+Angel Connect
+How we connect startups to angels
+VC Connect
+Partnerships with venture capital firms
+Pitch Days
+How startups participate
+Funding Readiness Workshop
+What participants learn
+________________________________________
+C. TOOLS & TEMPLATES
+Provide downloadable files:
+•	Business plan template
+•	Pitch deck template
+•	Financial model
+•	SWOT analysis
+•	Market validation toolkit
+________________________________________
+D. STARTUP SHOWCASE
+Each startup displayed with:
+•	Name
+•	Logo
+•	Description
+•	Website
+•	Founders
+________________________________________
+----------------------------------------
+PAGE 5: CAMPUS INITIATIVES 
+----------------------------------------
+INTRO
+Title:
+Campus Entrepreneurship Initiatives
+Text:
+We believe the next generation of Kerala’s entrepreneurs is sitting in classrooms today.
+KEF supports colleges and institutions to build entrepreneurship culture inside campuses.
+________________________________________
+A. MANAGEMENT FEST SUPPORT
+Full text explaining:
+•	Judging
+•	Event and games rounds planning
+•	Sponsorship
+•	Expert lectures
+•	Workshop modules
+•	How colleges can invite KEF
+________________________________________
+B. ENTREPRENEURSHIP WORKSHOPS
+List detailed workshops:
+•	Business Model Canvas
+•	Branding for Success
+•	Marketing on Zero Budget
+•	Pitching Skills
+•	Start up Mindset
+•	Leadership for Young Entrepreneurs
+________________________________________
+C. CAMPUS STARTUP CHALLENGES
+Describe all competitions in detail.
+________________________________________
+D. CAMPUS INCUBATION SUPPORT
+Explain how KEF helps build:
+•	Startup labs
+•	Innovation cells
+•	Mini incubators
+•	Entrepreneurship clubs
+________________________________________
+E. KEF AMBASSADOR PROGRAM
+Full description:
+•	Who can apply
+•	Responsibilities
+•	Benefits
+________________________________________
+----------------------------------------
+PAGE 6: EVENTS 
+----------------------------------------
+INTRO
+Title:
+Events & Conclaves
+Text:
+We conduct statewide and district-level events designed to build networks, inspire founders, and create real opportunities.
+________________________________________
+CATEGORIES
+•	Upcoming Events
+•	Past Events
+•	Flagship Events
+•	Campus Events
+•	Networking Events
+•	Boot Camps
+________________________________________
+EVENT CARD CONTENT (Template)
+•	Event Name
+•	Date
+•	Venue
+•	Description
+•	Speakers
+•	Registration button
+•	Gallery
+________________________________________
+----------------------------------------
+PAGE 7: MEMBERSHIP 
+----------------------------------------
+Title:
+Become a Member of Kerala Economic Forum
+Text:
+Join the movement and become part of Kerala’s most vibrant entrepreneurial network.
+________________________________________
+Membership Benefits:
+•	Access to all events
+•	Mentorship & advisory
+•	Funding support
+•	Networking circles
+•	Startup resources
+•	Campus opportunities
+•	Recognition badges
+________________________________________
+Membership Types (Detailed text for each):
+1.	Entrepreneur Membership
+2.	Student Membership
+3.	Campus Innovator Membership
+4.	Business Membership
+5.	Investor Membership
+6.	Institutional Membership
+________________________________________
+Signup Form
+(Name, Email, Phone, Role, Startup name, City, Message)
+________________________________________
+----------------------------------------
+PAGE 8: RESOURCES PAGE 
+----------------------------------------
+Title:
+Resources & Insights
+Sections:
+Articles & Insights
+Full articles on entrepreneurship, Kerala economy, marketing, funding.
+Downloadable Tools
+Business plan
+Pitch deck
+Finance templates
+Reports
+KEF annual report
+Research on Kerala’s startup ecosystem
+________________________________________
+----------------------------------------
+PAGE 9: PARTNERS PAGE 
+----------------------------------------
+Title:
+Our Partners
+Text:
+We collaborate with organisations that believe in building Kerala’s entrepreneurial future.
+Show logos + short description.
+________________________________________
+PARTNER WITH US SECTION
+Explain how to partner
+Call-to-action: Become a Partner
+________________________________________
+----------------------------------------
+PAGE 10: CONTACT 
+----------------------------------------
+Title:
+Get in Touch
+Text:
+We’d love to collaborate, support, and grow with you.
+________________________________________
+Contact Form Fields:
+•	Email
+•	Phone
+•	Category (Startup / Student / Institution / Investor / Other)
+•	Message
+________________________________________
+Address:
+Kerala Economic Forum
+Level 3, Venture Arcade, Mavoor Rd, above Croma, Thondayad, Kozhikode, Kerala 673016
+Email: inquiry@keralaeconomicforum.com
+Phone: +91 XXXXX XXXXX
+Social Media: Instagram / LinkedIn / YouTube
+
+
+
+Use the following blueprint EXACTLY as the content for each page.
+Format everything beautifully inside the UI.
+
+🏠 PAGE 1: HOME PAGE
+Hero Section
+
+Headline:
+Where Kerala’s Entrepreneurs Rise Together
+
+Subheadline:
+A statewide non-profit movement empowering entrepreneurs, startups, students, institutions, and innovators to build, grow, and transform Kerala’s economic future.
+
+Buttons:
+• Join the Forum
+• Explore Our Programs
+• Partner With Us
+
+Short tagline:
+Where ideas grow. Where founders rise. Where Kerala transforms.
+
+Quick Intro Section
+
+Title: Welcome to Kerala Economic Forum
+Body text exactly as provided.
+
+What We Do Section
+
+6 icon cards with minimal animations.
+
+Signature Programs Section
+
+Animated program cards with elegant hover effects.
+
+Impact Highlights Section
+
+Animated counters for:
+
+2,000+ Startups
+
+10,000+ Entrepreneurs
+
+200+ Campuses
+
+100+ Events
+
+100+ crore funding enablement target
+
+Upcoming Events Section
+
+Include event cards with smooth fade/slide animation.
+
+Partners Section
+
+Logo grid with grayscale-to-color hover animation.
+
+📘 PAGE 2: ABOUT US
+
+Use the full About Us content from the blueprint.
+
+Include:
+
+Smooth fade-up animations per section
+
+Hover-lift cards for objectives
+
+Team section with subtle shadows
+
+💼 PAGE 3: PROGRAMS
+
+Include all program descriptions with stylish horizontal cards.
+
+Each section:
+
+Slide-in animation
+
+Icon highlights
+
+UI glowing accents
+
+🚀 PAGE 4: STARTUP SUPPORT
+
+All content provided — place in accordion components + animated icons.
+
+🎓 PAGE 5: CAMPUS INITIATIVES
+
+Scrollable tab sections with animations.
+
+🎤 PAGE 6: EVENTS
+
+Event cards with:
+
+hover zoom
+
+embossed shadow
+
+slide-up fade
+
+👥 PAGE 7: MEMBERSHIP
+
+Membership levels displayed as glowing cards.
+
+📚 PAGE 8: RESOURCES
+
+Modern blog + downloadable cards.
+
+🤝 PAGE 9: PARTNERS
+
+Logo grid + call to action.
+
+📞 PAGE 10: CONTACT
+
+Include a beautiful animated contact form + Google Map embed style section.
+
+🎨 BRAND COLORS (Based on KEF logo)
+
+Use:
+
+Deep Red
+
+Bright Yellow
+
+Royal Blue
+
+Dark Charcoal / Black
+
+White
+
+Light gradients
+
+⚡ FINAL REQUIREMENT
+
+The website must feel:
+
+extremely premium
+
+visually rich
+
+modern
+
+high-energy startup themed
+
+uniquely designed (NOT generic)
+
+transition-heavy
+
+animation-rich
+
+polished and professional
