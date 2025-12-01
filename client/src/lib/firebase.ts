@@ -1,5 +1,5 @@
 // Firebase configuration and authentication setup
-import { initializeApp } from "firebase/app";
+import { initializeApp, type FirebaseApp } from "firebase/app";
 import { 
   getAuth, 
   signInWithPopup, 
@@ -8,23 +8,44 @@ import {
   signOut,
   GoogleAuthProvider,
   onAuthStateChanged,
-  type User
+  type User,
+  type Auth
 } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
+  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.firebaseapp.com`,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
+  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.firebasestorage.app`,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "demo-app-id",
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+const isConfigured = !!(
+  import.meta.env.VITE_FIREBASE_API_KEY && 
+  import.meta.env.VITE_FIREBASE_PROJECT_ID && 
+  import.meta.env.VITE_FIREBASE_APP_ID
+);
+
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+
+try {
+  if (isConfigured) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+  }
+} catch (error) {
+  console.warn('Firebase initialization failed. Authentication features will be disabled.', error);
+}
+
+export { auth };
 
 const googleProvider = new GoogleAuthProvider();
 
 export async function signInWithGoogle() {
+  if (!auth) {
+    return { user: null, error: 'Authentication is not configured. Please contact the administrator.' };
+  }
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return { user: result.user, error: null };
@@ -34,6 +55,9 @@ export async function signInWithGoogle() {
 }
 
 export async function signInWithEmail(email: string, password: string) {
+  if (!auth) {
+    return { user: null, error: 'Authentication is not configured. Please contact the administrator.' };
+  }
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
     return { user: result.user, error: null };
@@ -51,6 +75,9 @@ export async function signInWithEmail(email: string, password: string) {
 }
 
 export async function signUpWithEmail(email: string, password: string) {
+  if (!auth) {
+    return { user: null, error: 'Authentication is not configured. Please contact the administrator.' };
+  }
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     return { user: result.user, error: null };
@@ -68,6 +95,9 @@ export async function signUpWithEmail(email: string, password: string) {
 }
 
 export async function logOut() {
+  if (!auth) {
+    return { error: 'Authentication is not configured. Please contact the administrator.' };
+  }
   try {
     await signOut(auth);
     return { error: null };
@@ -77,6 +107,10 @@ export async function logOut() {
 }
 
 export function onAuthChange(callback: (user: User | null) => void) {
+  if (!auth) {
+    callback(null);
+    return () => {};
+  }
   return onAuthStateChanged(auth, callback);
 }
 
