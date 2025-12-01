@@ -83,7 +83,7 @@ export default function Navbar() {
                 alt="Kerala Economic Forum" 
                 className="h-10 w-10 md:h-12 md:w-12 transition-transform group-hover:scale-105"
               />
-              <div className="hidden sm:block">
+              <div className="hidden sm:block lg:hidden xl:block">
                 <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-kef-red via-kef-blue to-kef-yellow bg-clip-text text-transparent">
                   Kerala Economic Forum
                 </span>

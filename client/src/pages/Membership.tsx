@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, 
@@ -13,10 +14,34 @@ import {
   BookOpen,
   School,
   Award,
-  Check
+  Check,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { insertMembershipApplicationSchema, type InsertMembershipApplication, membershipTypes } from '@shared/schema';
 
 const benefits = [
   { icon: Calendar, title: 'Access to all events', description: 'Exclusive invitations to conferences, workshops, and networking sessions' },
@@ -28,8 +53,9 @@ const benefits = [
   { icon: Award, title: 'Recognition badges', description: 'Earn badges and certifications for your achievements' },
 ];
 
-const membershipTypes = [
+const membershipTypeCards = [
   {
+    id: 'entrepreneur' as const,
     icon: Users,
     title: 'Entrepreneur Membership',
     description: 'For founders, business owners, and aspiring entrepreneurs looking to grow their ventures.',
@@ -44,6 +70,7 @@ const membershipTypes = [
     popular: false
   },
   {
+    id: 'student' as const,
     icon: GraduationCap,
     title: 'Student Membership',
     description: 'Designed for students eager to explore entrepreneurship and build skills for the future.',
@@ -58,6 +85,7 @@ const membershipTypes = [
     popular: true
   },
   {
+    id: 'campus_innovator' as const,
     icon: Lightbulb,
     title: 'Campus Innovator Membership',
     description: 'For student innovators leading campus initiatives and entrepreneurship clubs.',
@@ -72,6 +100,7 @@ const membershipTypes = [
     popular: false
   },
   {
+    id: 'business' as const,
     icon: Building2,
     title: 'Business Membership',
     description: 'For established businesses seeking growth opportunities and strategic partnerships.',
@@ -86,6 +115,7 @@ const membershipTypes = [
     popular: false
   },
   {
+    id: 'investor' as const,
     icon: TrendingUp,
     title: 'Investor Membership',
     description: 'For angel investors, VCs, and HNIs looking to discover promising startups.',
@@ -100,6 +130,7 @@ const membershipTypes = [
     popular: false
   },
   {
+    id: 'institutional' as const,
     icon: Building,
     title: 'Institutional Membership',
     description: 'For educational institutions, incubators, and accelerators partnering with KEF.',
@@ -115,7 +146,70 @@ const membershipTypes = [
   },
 ];
 
+const membershipTypeLabels: Record<typeof membershipTypes[number], string> = {
+  entrepreneur: 'Entrepreneur Membership',
+  student: 'Student Membership',
+  campus_innovator: 'Campus Innovator Membership',
+  business: 'Business Membership',
+  investor: 'Investor Membership',
+  institutional: 'Institutional Membership',
+};
+
 export default function Membership() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedType, setSelectedType] = useState<typeof membershipTypes[number] | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<InsertMembershipApplication>({
+    resolver: zodResolver(insertMembershipApplicationSchema),
+    defaultValues: {
+      membershipType: 'entrepreneur',
+      fullName: '',
+      email: '',
+      phone: '',
+      organization: '',
+      designation: '',
+      linkedIn: '',
+      reason: '',
+    },
+  });
+
+  const applyMutation = useMutation({
+    mutationFn: async (data: InsertMembershipApplication) => {
+      const response = await apiRequest('POST', '/api/membership/apply', data);
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit application');
+      }
+      return result;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Application Submitted",
+        description: "Thank you for applying! We'll review your application and get back to you soon.",
+      });
+      setIsDialogOpen(false);
+      form.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleApplyClick = (typeId: typeof membershipTypes[number]) => {
+    setSelectedType(typeId);
+    form.setValue('membershipType', typeId);
+    setIsDialogOpen(true);
+  };
+
+  const onSubmit = (data: InsertMembershipApplication) => {
+    applyMutation.mutate(data);
+  };
+
   return (
     <main className="min-h-screen pt-20" data-testid="page-membership">
       <section className="relative py-20 overflow-hidden">
@@ -198,7 +292,7 @@ export default function Membership() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {membershipTypes.map((type, index) => (
+            {membershipTypeCards.map((type, index) => (
               <motion.div
                 key={type.title}
                 initial={{ opacity: 0, y: 20 }}
@@ -233,6 +327,8 @@ export default function Membership() {
                     </ul>
                     <Button 
                       className={`w-full bg-gradient-to-r ${type.gradient} text-white border-0 hover:opacity-90`}
+                      onClick={() => handleApplyClick(type.id)}
+                      data-testid={`button-apply-${type.id}`}
                     >
                       Apply Now
                     </Button>
@@ -260,12 +356,161 @@ export default function Membership() {
             <Button 
               size="lg"
               className="bg-gradient-to-r from-kef-red via-kef-blue to-kef-yellow text-white border-0 hover:opacity-90"
+              onClick={() => handleApplyClick('entrepreneur')}
+              data-testid="button-get-started"
             >
               Get Started Today
             </Button>
           </motion.div>
         </div>
       </section>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Apply for {selectedType ? membershipTypeLabels[selectedType] : 'Membership'}
+            </DialogTitle>
+            <DialogDescription>
+              Fill out the form below to apply for membership. We'll review your application and get back to you within 48 hours.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your full name" {...field} data-testid="input-fullname" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Address *</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="your@email.com" {...field} data-testid="input-email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="+91 98765 43210" {...field} data-testid="input-phone" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="organization"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Organization / Company</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your organization name" {...field} value={field.value ?? ''} data-testid="input-organization" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="designation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Designation / Role</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Founder, Student, Manager" {...field} value={field.value ?? ''} data-testid="input-designation" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="linkedIn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LinkedIn Profile</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://linkedin.com/in/yourprofile" {...field} value={field.value ?? ''} data-testid="input-linkedin" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="reason"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Why do you want to join KEF? *</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Tell us about yourself and what you hope to achieve as a member..."
+                        className="min-h-[100px]"
+                        {...field}
+                        data-testid="input-reason"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                  className="flex-1"
+                  data-testid="button-cancel"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={applyMutation.isPending}
+                  className="flex-1 bg-gradient-to-r from-kef-red to-kef-blue text-white"
+                  data-testid="button-submit-application"
+                >
+                  {applyMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Application'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
