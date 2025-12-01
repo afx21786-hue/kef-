@@ -13,6 +13,7 @@ import Programs from "@/pages/Programs";
 import StartupSupport from "@/pages/StartupSupport";
 import Campus from "@/pages/Campus";
 import Events from "@/pages/Events";
+import Membership from "@/pages/Membership";
 import Contact from "@/pages/Contact";
 import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/startup-support" component={StartupSupport} />
       <Route path="/campus" component={Campus} />
       <Route path="/events" component={Events} />
+      <Route path="/membership" component={Membership} />
       <Route path="/contact" component={Contact} />
       <Route path="/dashboard" component={Dashboard} />
       <Route component={NotFound} />

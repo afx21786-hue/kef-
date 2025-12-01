@@ -24,6 +24,7 @@ const navLinks = [
   { href: '/startup-support', label: 'Startup Support' },
   { href: '/campus', label: 'Campus Initiatives' },
   { href: '/events', label: 'Events' },
+  { href: '/membership', label: 'Membership' },
   { href: '/contact', label: 'Contact' },
 ];
 
