@@ -11,6 +11,26 @@ import {
   type User,
   type Auth
 } from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  doc,
+  addDoc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  onSnapshot,
+  serverTimestamp,
+  type Firestore,
+  type DocumentData,
+  type QueryConstraint
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
@@ -28,14 +48,16 @@ const isConfigured = !!(
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
+let db: Firestore | null = null;
 
 try {
   if (isConfigured) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
+    db = getFirestore(app);
   }
 } catch (error) {
-  console.warn('Firebase initialization failed. Authentication features will be disabled.', error);
+  console.warn('Firebase initialization failed. Authentication and Firestore features will be disabled.', error);
 }
 
 export { auth };
@@ -114,4 +136,152 @@ export function onAuthChange(callback: (user: User | null) => void) {
   return onAuthStateChanged(auth, callback);
 }
 
-export type { User };
+// Firestore exports
+export { db };
+
+// Firestore helper functions
+export async function addDocument<T extends DocumentData>(
+  collectionName: string, 
+  data: T
+): Promise<{ id: string | null; error: string | null }> {
+  if (!db) {
+    return { id: null, error: 'Firestore is not configured. Please contact the administrator.' };
+  }
+  try {
+    const docRef = await addDoc(collection(db, collectionName), {
+      ...data,
+      createdAt: serverTimestamp()
+    });
+    return { id: docRef.id, error: null };
+  } catch (error: any) {
+    return { id: null, error: error.message };
+  }
+}
+
+export async function setDocument<T extends DocumentData>(
+  collectionName: string,
+  docId: string,
+  data: T,
+  merge: boolean = false
+): Promise<{ error: string | null }> {
+  if (!db) {
+    return { error: 'Firestore is not configured. Please contact the administrator.' };
+  }
+  try {
+    await setDoc(doc(db, collectionName, docId), {
+      ...data,
+      updatedAt: serverTimestamp()
+    }, { merge });
+    return { error: null };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
+
+export async function getDocument<T = DocumentData>(
+  collectionName: string,
+  docId: string
+): Promise<{ data: T | null; error: string | null }> {
+  if (!db) {
+    return { data: null, error: 'Firestore is not configured. Please contact the administrator.' };
+  }
+  try {
+    const docSnap = await getDoc(doc(db, collectionName, docId));
+    if (docSnap.exists()) {
+      return { data: { id: docSnap.id, ...docSnap.data() } as T, error: null };
+    }
+    return { data: null, error: 'Document not found' };
+  } catch (error: any) {
+    return { data: null, error: error.message };
+  }
+}
+
+export async function getDocuments<T = DocumentData>(
+  collectionName: string,
+  ...queryConstraints: QueryConstraint[]
+): Promise<{ data: T[]; error: string | null }> {
+  if (!db) {
+    return { data: [], error: 'Firestore is not configured. Please contact the administrator.' };
+  }
+  try {
+    const q = query(collection(db, collectionName), ...queryConstraints);
+    const querySnapshot = await getDocs(q);
+    const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+    return { data: docs, error: null };
+  } catch (error: any) {
+    return { data: [], error: error.message };
+  }
+}
+
+export async function updateDocument<T extends DocumentData>(
+  collectionName: string,
+  docId: string,
+  data: Partial<T>
+): Promise<{ error: string | null }> {
+  if (!db) {
+    return { error: 'Firestore is not configured. Please contact the administrator.' };
+  }
+  try {
+    await updateDoc(doc(db, collectionName, docId), {
+      ...data,
+      updatedAt: serverTimestamp()
+    });
+    return { error: null };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
+
+export async function deleteDocument(
+  collectionName: string,
+  docId: string
+): Promise<{ error: string | null }> {
+  if (!db) {
+    return { error: 'Firestore is not configured. Please contact the administrator.' };
+  }
+  try {
+    await deleteDoc(doc(db, collectionName, docId));
+    return { error: null };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+}
+
+export function subscribeToCollection<T = DocumentData>(
+  collectionName: string,
+  callback: (data: T[]) => void,
+  ...queryConstraints: QueryConstraint[]
+): () => void {
+  if (!db) {
+    callback([]);
+    return () => {};
+  }
+  const q = query(collection(db, collectionName), ...queryConstraints);
+  return onSnapshot(q, (snapshot) => {
+    const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
+    callback(docs);
+  });
+}
+
+export function subscribeToDocument<T = DocumentData>(
+  collectionName: string,
+  docId: string,
+  callback: (data: T | null) => void
+): () => void {
+  if (!db) {
+    callback(null);
+    return () => {};
+  }
+  return onSnapshot(doc(db, collectionName, docId), (docSnap) => {
+    if (docSnap.exists()) {
+      callback({ id: docSnap.id, ...docSnap.data() } as T);
+    } else {
+      callback(null);
+    }
+  });
+}
+
+// Re-export Firestore query helpers for use in components
+export { collection, doc, query, where, orderBy, limit, serverTimestamp };
+
+export type { User, DocumentData };
