@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
+import { useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,7 +16,8 @@ import {
   Users,
   Building,
   GraduationCap,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -44,17 +47,45 @@ export default function Contact() {
     message: '',
   });
 
+  const contactMutation = useMutation({
+    mutationFn: async (data: { fullName: string; email: string; phone: string; category: string; subject: string; message: string }) => {
+      const response = await apiRequest('POST', '/api/contact', data);
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit');
+      }
+      return result;
+    },
+    onSuccess: () => {
+      setIsSubmitted(true);
+      toast({
+        title: "Message sent successfully!",
+        description: "We'll get back to you within 24-48 hours.",
+      });
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({ name: '', email: '', phone: '', organization: '', message: '' });
+      }, 3000);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to send message",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    toast({
-      title: "Message sent successfully!",
-      description: "We'll get back to you within 24-48 hours.",
+    contactMutation.mutate({
+      fullName: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      category: selectedType,
+      subject: `${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} Inquiry from ${formData.name}`,
+      message: formData.message,
     });
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ name: '', email: '', phone: '', organization: '', message: '' });
-    }, 3000);
   };
 
   return (
@@ -185,11 +216,16 @@ export default function Contact() {
                       <Button 
                         type="submit"
                         size="lg"
+                        disabled={contactMutation.isPending}
                         className="w-full bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
                         data-testid="button-contact-submit"
                       >
-                        <Send className="w-4 h-4 mr-2" />
-                        Send Message
+                        {contactMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Send className="w-4 h-4 mr-2" />
+                        )}
+                        {contactMutation.isPending ? 'Sending...' : 'Send Message'}
                       </Button>
                     </form>
                   )}

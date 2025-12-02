@@ -1,54 +1,502 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertMembershipApplicationSchema } from "@shared/schema";
+import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
+import { 
+  insertResourceSchema, insertProgramSchema, insertEventSchema, 
+  insertMembershipPlanSchema, insertApplyFormSchema, insertRegisterFormSchema,
+  insertConsultationSchema, insertAdvisorySessionSchema, insertCampusInviteSchema,
+  insertContactSchema
+} from "@shared/schema";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  app.post("/api/membership/apply", async (req, res) => {
+  await setupAuth(app);
+
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const parsed = insertMembershipApplicationSchema.safeParse(req.body);
-      
-      if (!parsed.success) {
-        return res.status(400).json({ 
-          error: "Validation failed", 
-          details: parsed.error.errors 
-        });
-      }
-
-      const existingApplication = await storage.getMembershipApplicationByEmail(parsed.data.email);
-      if (existingApplication) {
-        return res.status(409).json({ 
-          error: "An application with this email already exists" 
-        });
-      }
-
-      const application = await storage.createMembershipApplication(parsed.data);
-      
-      return res.status(201).json({ 
-        success: true, 
-        message: "Application submitted successfully",
-        applicationId: application.id 
-      });
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
     } catch (error) {
-      console.error("Error creating membership application:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
-  app.get("/api/membership/applications", async (req, res) => {
+  app.get("/api/resources", async (req, res) => {
     try {
-      const applications = await storage.getMembershipApplications();
-      const serialized = applications.map(app => ({
-        ...app,
-        createdAt: app.createdAt?.toISOString() || null
-      }));
-      return res.json(serialized);
+      const resources = await storage.getResources();
+      const activeResources = resources.filter(r => r.isActive);
+      res.json(activeResources);
     } catch (error) {
-      console.error("Error fetching membership applications:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      console.error("Error fetching resources:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/programs", async (req, res) => {
+    try {
+      const programs = await storage.getPrograms();
+      const activePrograms = programs.filter(p => p.isActive);
+      res.json(activePrograms);
+    } catch (error) {
+      console.error("Error fetching programs:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/events", async (req, res) => {
+    try {
+      const events = await storage.getEvents();
+      const activeEvents = events.filter(e => e.isActive);
+      res.json(activeEvents);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/membership-plans", async (req, res) => {
+    try {
+      const plans = await storage.getMembershipPlans();
+      const activePlans = plans.filter(p => p.isActive);
+      res.json(activePlans);
+    } catch (error) {
+      console.error("Error fetching membership plans:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/forms/apply", async (req, res) => {
+    try {
+      const parsed = insertApplyFormSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const submission = await storage.createApplyFormSubmission(parsed.data);
+      res.status(201).json({ success: true, message: "Application submitted successfully", id: submission.id });
+    } catch (error) {
+      console.error("Error submitting apply form:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/forms/register", async (req, res) => {
+    try {
+      const parsed = insertRegisterFormSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const submission = await storage.createRegisterFormSubmission(parsed.data);
+      res.status(201).json({ success: true, message: "Registration submitted successfully", id: submission.id });
+    } catch (error) {
+      console.error("Error submitting register form:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/forms/consultation", async (req, res) => {
+    try {
+      const parsed = insertConsultationSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const submission = await storage.createConsultationSubmission(parsed.data);
+      res.status(201).json({ success: true, message: "Consultation request submitted successfully", id: submission.id });
+    } catch (error) {
+      console.error("Error submitting consultation form:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/forms/advisory", async (req, res) => {
+    try {
+      const parsed = insertAdvisorySessionSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const submission = await storage.createAdvisorySessionSubmission(parsed.data);
+      res.status(201).json({ success: true, message: "Advisory session request submitted successfully", id: submission.id });
+    } catch (error) {
+      console.error("Error submitting advisory form:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/forms/campus-invite", async (req, res) => {
+    try {
+      const parsed = insertCampusInviteSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const submission = await storage.createCampusInviteSubmission(parsed.data);
+      res.status(201).json({ success: true, message: "Campus invite request submitted successfully", id: submission.id });
+    } catch (error) {
+      console.error("Error submitting campus invite form:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const parsed = insertContactSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const submission = await storage.createContactSubmission(parsed.data);
+      res.status(201).json({ success: true, message: "Contact form submitted successfully", id: submission.id });
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/resources", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const resources = await storage.getResources();
+      res.json(resources);
+    } catch (error) {
+      console.error("Error fetching admin resources:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/resources", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const parsed = insertResourceSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const resource = await storage.createResource(parsed.data);
+      res.status(201).json(resource);
+    } catch (error) {
+      console.error("Error creating resource:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/resources/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const resource = await storage.updateResource(req.params.id, req.body);
+      if (!resource) {
+        return res.status(404).json({ error: "Resource not found" });
+      }
+      res.json(resource);
+    } catch (error) {
+      console.error("Error updating resource:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/resources/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteResource(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting resource:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/programs", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const programs = await storage.getPrograms();
+      res.json(programs);
+    } catch (error) {
+      console.error("Error fetching admin programs:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/programs", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const parsed = insertProgramSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const program = await storage.createProgram(parsed.data);
+      res.status(201).json(program);
+    } catch (error) {
+      console.error("Error creating program:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/programs/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const program = await storage.updateProgram(req.params.id, req.body);
+      if (!program) {
+        return res.status(404).json({ error: "Program not found" });
+      }
+      res.json(program);
+    } catch (error) {
+      console.error("Error updating program:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/programs/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteProgram(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting program:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/events", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const events = await storage.getEvents();
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching admin events:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/events", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const parsed = insertEventSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const event = await storage.createEvent(parsed.data);
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/events/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const event = await storage.updateEvent(req.params.id, req.body);
+      if (!event) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/events/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteEvent(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/membership-plans", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const plans = await storage.getMembershipPlans();
+      res.json(plans);
+    } catch (error) {
+      console.error("Error fetching admin membership plans:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/membership-plans", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const parsed = insertMembershipPlanSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validation failed", details: parsed.error.errors });
+      }
+      const plan = await storage.createMembershipPlan(parsed.data);
+      res.status(201).json(plan);
+    } catch (error) {
+      console.error("Error creating membership plan:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/membership-plans/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const plan = await storage.updateMembershipPlan(req.params.id, req.body);
+      if (!plan) {
+        return res.status(404).json({ error: "Membership plan not found" });
+      }
+      res.json(plan);
+    } catch (error) {
+      console.error("Error updating membership plan:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/membership-plans/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteMembershipPlan(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting membership plan:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/forms/apply", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const submissions = await storage.getApplyFormSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching apply form submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/forms/apply/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { status, adminNotes } = req.body;
+      const submission = await storage.updateApplyFormStatus(req.params.id, status, adminNotes);
+      res.json(submission);
+    } catch (error) {
+      console.error("Error updating apply form submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/forms/register", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const submissions = await storage.getRegisterFormSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching register form submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/forms/register/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { status, adminNotes } = req.body;
+      const submission = await storage.updateRegisterFormStatus(req.params.id, status, adminNotes);
+      res.json(submission);
+    } catch (error) {
+      console.error("Error updating register form submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/forms/consultation", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const submissions = await storage.getConsultationSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching consultation submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/forms/consultation/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { status, adminNotes } = req.body;
+      const submission = await storage.updateConsultationStatus(req.params.id, status, adminNotes);
+      res.json(submission);
+    } catch (error) {
+      console.error("Error updating consultation submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/forms/advisory", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const submissions = await storage.getAdvisorySessionSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching advisory submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/forms/advisory/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { status, adminNotes } = req.body;
+      const submission = await storage.updateAdvisorySessionStatus(req.params.id, status, adminNotes);
+      res.json(submission);
+    } catch (error) {
+      console.error("Error updating advisory submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/forms/campus-invite", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const submissions = await storage.getCampusInviteSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching campus invite submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/forms/campus-invite/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { status, adminNotes } = req.body;
+      const submission = await storage.updateCampusInviteStatus(req.params.id, status, adminNotes);
+      res.json(submission);
+    } catch (error) {
+      console.error("Error updating campus invite submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/contact", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const submissions = await storage.getContactSubmissions(category);
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching contact submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/contact/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { status, adminNotes } = req.body;
+      const submission = await storage.updateContactStatus(req.params.id, status, adminNotes);
+      res.json(submission);
+    } catch (error) {
+      console.error("Error updating contact submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/admin/email-reply", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { submissionId, submissionType, recipientEmail, subject, body } = req.body;
+      const userId = req.user.claims.sub;
+      
+      const reply = await storage.createEmailReply({
+        submissionId,
+        submissionType,
+        recipientEmail,
+        subject,
+        body,
+        sentBy: userId,
+      });
+      
+      res.status(201).json({ success: true, message: "Reply sent successfully", reply });
+    } catch (error) {
+      console.error("Error sending email reply:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/admin/email-replies/:submissionId/:submissionType", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const replies = await storage.getEmailReplies(req.params.submissionId, req.params.submissionType);
+      res.json(replies);
+    } catch (error) {
+      console.error("Error fetching email replies:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 

@@ -17,6 +17,7 @@ import Events from "@/pages/Events";
 import Membership from "@/pages/Membership";
 import Contact from "@/pages/Contact";
 import Dashboard from "@/pages/Dashboard";
+import Admin from "@/pages/Admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/membership" component={Membership} />
       <Route path="/contact" component={Contact} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );

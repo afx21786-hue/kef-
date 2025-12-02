@@ -41,7 +41,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { insertMembershipApplicationSchema, type InsertMembershipApplication, membershipTypes } from '@shared/schema';
+import { insertRegisterFormSchema, type InsertRegisterForm } from '@shared/schema';
+
+const membershipTypes = [
+  'entrepreneur',
+  'student',
+  'campus_innovator',
+  'business',
+  'investor',
+  'institutional'
+] as const;
 
 const benefits = [
   { icon: Calendar, title: 'Access to all events', description: 'Exclusive invitations to conferences, workshops, and networking sessions' },
@@ -160,8 +169,8 @@ export default function Membership() {
   const [selectedType, setSelectedType] = useState<typeof membershipTypes[number] | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<InsertMembershipApplication>({
-    resolver: zodResolver(insertMembershipApplicationSchema),
+  const form = useForm<InsertRegisterForm>({
+    resolver: zodResolver(insertRegisterFormSchema),
     defaultValues: {
       membershipType: 'entrepreneur',
       fullName: '',
@@ -175,8 +184,8 @@ export default function Membership() {
   });
 
   const applyMutation = useMutation({
-    mutationFn: async (data: InsertMembershipApplication) => {
-      const response = await apiRequest('POST', '/api/membership/apply', data);
+    mutationFn: async (data: InsertRegisterForm) => {
+      const response = await apiRequest('POST', '/api/forms/register', data);
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result.error || 'Failed to submit application');
@@ -206,7 +215,7 @@ export default function Membership() {
     setIsDialogOpen(true);
   };
 
-  const onSubmit = (data: InsertMembershipApplication) => {
+  const onSubmit = (data: InsertRegisterForm) => {
     applyMutation.mutate(data);
   };
 
