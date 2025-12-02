@@ -89,8 +89,32 @@ Preferred communication style: Simple, everyday language.
 ### External Dependencies
 
 **Third-Party Services**:
-- **Firebase**: Authentication (email/password + Google OAuth)
+- **Firebase**: Authentication (email/password + Google OAuth) and Firestore database
 - **Neon Database**: PostgreSQL serverless database (configured but not provisioned)
+
+### Firestore Integration
+
+The application includes a comprehensive Firestore integration in `client/src/lib/firebase.ts`:
+
+**Helper Functions**:
+- `addDocument(collectionName, data)` - Add a new document with auto-generated ID
+- `setDocument(collectionName, docId, data, merge?)` - Set/create document with specific ID
+- `getDocument(collectionName, docId)` - Get a single document
+- `getDocuments(collectionName, ...queryConstraints)` - Query multiple documents
+- `updateDocument(collectionName, docId, data)` - Update existing document
+- `deleteDocument(collectionName, docId)` - Delete a document
+
+**Real-time Subscriptions**:
+- `subscribeToCollection(collectionName, callback, ...queryConstraints)` - Subscribe to collection changes
+- `subscribeToDocument(collectionName, docId, callback)` - Subscribe to document changes
+
+**Query Utilities** (re-exported for use in components):
+- `where`, `orderBy`, `limit` - Firestore query constraints
+
+**Notes**:
+- All helper functions automatically add `createdAt` or `updatedAt` timestamps via `serverTimestamp()`
+- Functions gracefully handle missing Firebase configuration and return appropriate error messages
+- Subscription functions return unsubscribe handlers for cleanup in useEffect
 
 **Key Libraries**:
 - **UI Components**: @radix-ui primitives (accordion, dialog, dropdown, navigation, etc.)
