@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
+import { sendEmail, formatReplyEmail } from "./email";
 import { 
   insertResourceSchema, insertProgramSchema, insertEventSchema, 
   insertMembershipPlanSchema, insertApplyFormSchema, insertRegisterFormSchema,
@@ -474,6 +475,21 @@ export async function registerRoutes(
       const { submissionId, submissionType, recipientEmail, subject, body } = req.body;
       const userId = req.user.claims.sub;
       
+      // Send the actual email via Resend
+      const htmlContent = formatReplyEmail(subject, body);
+      const emailResult = await sendEmail({
+        to: recipientEmail,
+        subject: subject,
+        html: htmlContent,
+        text: body,
+      });
+
+      if (!emailResult.success) {
+        console.error("Failed to send email:", emailResult.error);
+        return res.status(500).json({ error: `Failed to send email: ${emailResult.error}` });
+      }
+      
+      // Store the reply record in the database
       const reply = await storage.createEmailReply({
         submissionId,
         submissionType,
@@ -483,7 +499,7 @@ export async function registerRoutes(
         sentBy: userId,
       });
       
-      res.status(201).json({ success: true, message: "Reply sent successfully", reply });
+      res.status(201).json({ success: true, message: "Email sent successfully", reply, emailId: emailResult.id });
     } catch (error) {
       console.error("Error sending email reply:", error);
       res.status(500).json({ error: "Internal server error" });

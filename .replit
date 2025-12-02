@@ -22,10 +22,6 @@ externalPort = 3000
 localPort = 38375
 externalPort = 3001
 
-[[ports]]
-localPort = 44169
-externalPort = 3002
-
 [env]
 PORT = "5000"
 
@@ -54,7 +50,7 @@ args = "npm run dev"
 waitForPort = 5000
 
 [agent]
-integrations = ["firebase_barebones_javascript:1.0.0"]
+integrations = ["firebase_barebones_javascript:1.0.0", "resend:1.0.0"]
 expertMode = true
 
 [userenv]
