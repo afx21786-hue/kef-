@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, MapPin, Users, Clock, ArrowRight, Filter } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import eventImage from '@assets/generated_images/business_conference_networking_scene.png';
 
 const allEvents = [
@@ -82,6 +84,16 @@ export default function Events() {
   const { ref, isVisible } = useScrollAnimation(0.1);
   const [activeTab, setActiveTab] = useState('upcoming');
   const [selectedType, setSelectedType] = useState('All');
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  const handleRegister = (eventTitle: string) => {
+    toast({
+      title: "Registration Started",
+      description: `You're registering for ${eventTitle}. Please complete your profile to finish registration.`,
+    });
+    setLocation('/membership');
+  };
 
   const filteredEvents = allEvents
     .filter(event => event.category === activeTab)
@@ -168,7 +180,11 @@ export default function Events() {
                           <span>{event.attendees}</span>
                         </div>
                       </div>
-                      <Button className="w-full bg-gradient-to-r from-kef-red to-kef-blue text-white border-0">
+                      <Button 
+                        className="w-full bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
+                        onClick={() => handleRegister(event.title)}
+                        data-testid={`button-register-${event.id}`}
+                      >
                         Register Now
                       </Button>
                     </CardContent>
@@ -239,6 +255,8 @@ export default function Events() {
           <Button 
             size="lg"
             className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
+            onClick={() => setLocation('/contact')}
+            data-testid="button-partner-events"
           >
             Partner With Us
             <ArrowRight className="ml-2 h-4 w-4" />

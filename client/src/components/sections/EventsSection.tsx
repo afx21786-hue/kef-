@@ -1,8 +1,11 @@
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Calendar, MapPin, Users, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import eventImage from '@assets/generated_images/business_conference_networking_scene.png';
 
 const events = [
@@ -37,6 +40,16 @@ const events = [
 
 export default function EventsSection() {
   const { ref, isVisible } = useScrollAnimation(0.1);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  const handleRegister = (eventTitle: string) => {
+    toast({
+      title: "Registration Started",
+      description: `You're registering for ${eventTitle}. Please complete your profile to finish registration.`,
+    });
+    setLocation('/membership');
+  };
 
   return (
     <section 
@@ -60,6 +73,7 @@ export default function EventsSection() {
           <Button 
             variant="outline"
             className="self-start md:self-auto"
+            onClick={() => setLocation('/events')}
             data-testid="button-explore-events"
           >
             Explore All Events
@@ -117,6 +131,7 @@ export default function EventsSection() {
                 <Button 
                   variant="outline" 
                   className="w-full"
+                  onClick={() => handleRegister(event.title)}
                   data-testid={`button-register-${index}`}
                 >
                   Register Now

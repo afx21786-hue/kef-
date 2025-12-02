@@ -1,3 +1,4 @@
+import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -48,6 +49,7 @@ const programs = [
 
 export default function ProgramsSection() {
   const { ref, isVisible } = useScrollAnimation(0.1);
+  const [, setLocation] = useLocation();
 
   return (
     <section 
@@ -104,6 +106,7 @@ export default function ProgramsSection() {
           <Button 
             size="lg"
             className="bg-gradient-to-r from-kef-yellow to-kef-red text-white border-0"
+            onClick={() => setLocation('/programs')}
             data-testid="button-view-all-programs"
           >
             View All Programs

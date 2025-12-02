@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'wouter';
 import { 
   Mail, 
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 import kefLogo from '@assets/KEF__1_-removebg-preview_1764600424285.png';
 
 const footerLinks = {
@@ -47,6 +49,20 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const { toast } = useToast();
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      toast({
+        title: "Successfully subscribed!",
+        description: "You'll receive our latest updates and news.",
+      });
+      setEmail('');
+    }
+  };
+
   return (
     <footer className="bg-muted/50 border-t border-border" data-testid="footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -118,23 +134,27 @@ export default function Footer() {
 
         <div className="py-8 border-t border-border">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row items-center gap-4">
               <span className="text-sm text-muted-foreground">Subscribe to our newsletter</span>
               <div className="flex gap-2">
                 <Input 
                   type="email" 
                   placeholder="Enter your email" 
                   className="w-64"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   data-testid="input-newsletter-email"
                 />
                 <Button 
+                  type="submit"
                   className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
                   data-testid="button-newsletter-subscribe"
                 >
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
-            </div>
+            </form>
             <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} Kerala Economic Forum. All rights reserved.
             </p>

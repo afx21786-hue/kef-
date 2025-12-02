@@ -1,10 +1,15 @@
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles, Users, Rocket } from 'lucide-react';
 import heroImage from '@assets/generated_images/kef_hero_entrepreneurship_background.png';
+import AuthModal from '@/components/auth/AuthModal';
 
 export default function HeroSection() {
   const { ref, isVisible } = useScrollAnimation(0.1);
+  const [, setLocation] = useLocation();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   return (
     <section 
@@ -48,6 +53,7 @@ export default function HeroSection() {
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-kef-red to-kef-blue text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-kef-red/25 hover:shadow-kef-red/40 transition-all border-0"
+              onClick={() => setIsAuthModalOpen(true)}
               data-testid="button-hero-join"
             >
               Join the Forum
@@ -57,6 +63,7 @@ export default function HeroSection() {
               size="lg" 
               variant="outline"
               className="px-8 py-6 text-lg rounded-xl backdrop-blur-sm"
+              onClick={() => setLocation('/programs')}
               data-testid="button-hero-programs"
             >
               Explore Our Programs
@@ -65,6 +72,7 @@ export default function HeroSection() {
               size="lg" 
               variant="ghost"
               className="text-lg"
+              onClick={() => setLocation('/contact')}
               data-testid="button-hero-partner"
             >
               Partner With Us
@@ -103,6 +111,8 @@ export default function HeroSection() {
           <div className="w-1 h-2 bg-muted-foreground/50 rounded-full" />
         </div>
       </div>
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </section>
   );
 }

@@ -1,3 +1,4 @@
+import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Building, Landmark, GraduationCap, Rocket, Briefcase, Globe } from 'lucide-react';
@@ -13,6 +14,7 @@ const partnerCategories = [
 
 export default function PartnersSection() {
   const { ref, isVisible } = useScrollAnimation(0.1);
+  const [, setLocation] = useLocation();
 
   return (
     <section 
@@ -65,6 +67,7 @@ export default function PartnersSection() {
           <Button 
             size="lg"
             className="bg-gradient-to-r from-kef-blue to-kef-yellow text-white border-0"
+            onClick={() => setLocation('/contact')}
             data-testid="button-partner-with-us"
           >
             Partner With Us
