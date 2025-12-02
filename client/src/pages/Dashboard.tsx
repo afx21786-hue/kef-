@@ -1,6 +1,7 @@
 import { useAuth } from '@/lib/AuthContext';
+import { useAuth as useServerAuth } from '@/hooks/useAuth';
 import { logOut } from '@/lib/firebase';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,11 +16,13 @@ import {
   Trophy,
   Bell,
   Settings,
-  ArrowRight
+  ArrowRight,
+  Shield
 } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
+  const { isAdmin } = useServerAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -79,17 +82,29 @@ export default function Dashboard() {
                 </Badge>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Button variant="outline" size="icon">
                 <Bell className="w-4 h-4" />
               </Button>
               <Button variant="outline" size="icon">
                 <Settings className="w-4 h-4" />
               </Button>
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button 
+                    variant="outline"
+                    className="bg-gradient-to-r from-kef-red/10 to-kef-blue/10 border-kef-red/30"
+                    data-testid="button-admin-panel"
+                  >
+                    <Shield className="w-4 h-4 mr-2" />
+                    Admin Panel
+                  </Button>
+                </Link>
+              )}
               <Button 
                 variant="outline" 
                 onClick={handleLogout}
-                className="text-destructive hover:text-destructive"
+                className="text-destructive"
                 data-testid="button-logout"
               >
                 <LogOut className="w-4 h-4 mr-2" />
