@@ -1,9 +1,11 @@
+import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Target, Lightbulb, Network, TrendingUp } from 'lucide-react';
 
 export default function WelcomeSection() {
   const { ref, isVisible } = useScrollAnimation(0.2);
+  const [, setLocation] = useLocation();
 
   return (
     <section 
@@ -37,6 +39,7 @@ export default function WelcomeSection() {
             </p>
             <Button 
               className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
+              onClick={() => setLocation('/about')}
               data-testid="button-learn-more"
             >
               Learn More About Us
