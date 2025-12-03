@@ -11,11 +11,38 @@ import {
   insertContactSchema
 } from "@shared/schema";
 
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '786954';
+
+const isAdminSession = (req: any, res: any, next: any) => {
+  if (req.session && req.session.isAdmin === true) {
+    return next();
+  }
+  return res.status(401).json({ error: "Admin authentication required" });
+};
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
   await setupAuth(app);
+
+  app.post('/api/admin/login', (req: any, res) => {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+      req.session.isAdmin = true;
+      return res.json({ success: true, message: "Admin access granted" });
+    }
+    return res.status(401).json({ success: false, message: "Incorrect password" });
+  });
+
+  app.post('/api/admin/logout', (req: any, res) => {
+    req.session.isAdmin = false;
+    return res.json({ success: true, message: "Logged out" });
+  });
+
+  app.get('/api/admin/check', (req: any, res) => {
+    return res.json({ isAdmin: req.session?.isAdmin === true });
+  });
 
   // Firebase user sync endpoint - secured with Firebase Auth
   app.post('/api/auth/sync', requireFirebaseAuth, async (req: any, res) => {
@@ -214,6 +241,67 @@ export async function registerRoutes(
       res.status(201).json({ success: true, message: "Contact form submitted successfully", id: submission.id });
     } catch (error) {
       console.error("Error submitting contact form:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/forms/apply/all", isAdminSession, async (req, res) => {
+    try {
+      const submissions = await storage.getApplyFormSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching apply form submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/forms/register/all", isAdminSession, async (req, res) => {
+    try {
+      const submissions = await storage.getRegisterFormSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching register form submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/forms/consultation/all", isAdminSession, async (req, res) => {
+    try {
+      const submissions = await storage.getConsultationSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching consultation submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/forms/advisory/all", isAdminSession, async (req, res) => {
+    try {
+      const submissions = await storage.getAdvisorySessionSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching advisory submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/forms/campus-invite/all", isAdminSession, async (req, res) => {
+    try {
+      const submissions = await storage.getCampusInviteSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching campus invite submissions:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.get("/api/contact/all", isAdminSession, async (req, res) => {
+    try {
+      const category = req.query.category as string | undefined;
+      const submissions = await storage.getContactSubmissions(category);
+      res.json(submissions);
+    } catch (error) {
+      console.error("Error fetching contact submissions:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });

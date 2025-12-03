@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient, authenticatedApiRequest, authenticatedFetch } from '@/lib/queryClient';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -50,11 +49,11 @@ import {
   Plus,
   Trash2,
   Edit,
-  Eye,
   Send,
   Loader2,
   LogOut,
-  RefreshCw
+  RefreshCw,
+  Lock
 } from 'lucide-react';
 import type { 
   Resource, Program, Event, MembershipPlan,
@@ -67,9 +66,12 @@ type TabType = 'dashboard' | 'resources' | 'programs' | 'events' | 'membership-p
   'campus-invites' | 'contact-general' | 'contact-partnership' | 'contact-corporate' | 'contact-campus';
 
 export default function Admin() {
-  const { user, isLoading, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isReplyOpen, setIsReplyOpen] = useState(false);
@@ -77,156 +79,164 @@ export default function Admin() {
   const [replyData, setReplyData] = useState({ subject: '', body: '', recipientEmail: '', submissionId: '', submissionType: '' });
 
   useEffect(() => {
-    if (!isLoading && !isAdmin) {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/admin/check', { credentials: 'include' });
+        const data = await res.json();
+        setIsAuthenticated(data.isAdmin === true);
+      } catch (error) {
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsAuthenticated(true);
+        toast({
+          title: "Access Granted",
+          description: "Welcome to the Admin Panel",
+        });
+      } else {
+        toast({
+          title: "Access Denied",
+          description: "Incorrect password. Please try again.",
+          variant: "destructive",
+        });
+        setPassword('');
+      }
+    } catch (error) {
       toast({
-        title: "Access Denied",
-        description: "You need admin privileges to access this page.",
+        title: "Error",
+        description: "Failed to authenticate. Please try again.",
         variant: "destructive",
       });
-      setLocation('/');
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [isLoading, isAdmin, setLocation, toast]);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    setIsAuthenticated(false);
+    setLocation('/');
+  };
 
   const { data: resources = [], refetch: refetchResources } = useQuery<Resource[]>({
-    queryKey: ['/api/admin/resources'],
-    queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/resources');
-      if (!res.ok) throw new Error('Failed to fetch resources');
-      return res.json();
-    },
-    enabled: isAdmin,
+    queryKey: ['/api/resources'],
+    enabled: isAuthenticated,
   });
 
   const { data: programs = [], refetch: refetchPrograms } = useQuery<Program[]>({
-    queryKey: ['/api/admin/programs'],
-    queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/programs');
-      if (!res.ok) throw new Error('Failed to fetch programs');
-      return res.json();
-    },
-    enabled: isAdmin,
+    queryKey: ['/api/programs'],
+    enabled: isAuthenticated,
   });
 
   const { data: events = [], refetch: refetchEvents } = useQuery<Event[]>({
-    queryKey: ['/api/admin/events'],
-    queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/events');
-      if (!res.ok) throw new Error('Failed to fetch events');
-      return res.json();
-    },
-    enabled: isAdmin,
+    queryKey: ['/api/events'],
+    enabled: isAuthenticated,
   });
 
   const { data: membershipPlans = [], refetch: refetchPlans } = useQuery<MembershipPlan[]>({
-    queryKey: ['/api/admin/membership-plans'],
-    queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/membership-plans');
-      if (!res.ok) throw new Error('Failed to fetch membership plans');
-      return res.json();
-    },
-    enabled: isAdmin,
+    queryKey: ['/api/membership-plans'],
+    enabled: isAuthenticated,
   });
 
   const { data: applyForms = [] } = useQuery<ApplyFormSubmission[]>({
-    queryKey: ['/api/admin/forms/apply'],
-    queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/forms/apply');
-      if (!res.ok) throw new Error('Failed to fetch apply forms');
-      return res.json();
-    },
-    enabled: isAdmin,
+    queryKey: ['/api/forms/apply/all'],
+    enabled: isAuthenticated,
   });
 
   const { data: registerForms = [] } = useQuery<RegisterFormSubmission[]>({
-    queryKey: ['/api/admin/forms/register'],
-    queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/forms/register');
-      if (!res.ok) throw new Error('Failed to fetch register forms');
-      return res.json();
-    },
-    enabled: isAdmin,
+    queryKey: ['/api/forms/register/all'],
+    enabled: isAuthenticated,
   });
 
   const { data: consultations = [] } = useQuery<ConsultationSubmission[]>({
-    queryKey: ['/api/admin/forms/consultation'],
-    queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/forms/consultation');
-      if (!res.ok) throw new Error('Failed to fetch consultations');
-      return res.json();
-    },
-    enabled: isAdmin,
+    queryKey: ['/api/forms/consultation/all'],
+    enabled: isAuthenticated,
   });
 
   const { data: advisorySessions = [] } = useQuery<AdvisorySessionSubmission[]>({
-    queryKey: ['/api/admin/forms/advisory'],
-    queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/forms/advisory');
-      if (!res.ok) throw new Error('Failed to fetch advisory sessions');
-      return res.json();
-    },
-    enabled: isAdmin,
+    queryKey: ['/api/forms/advisory/all'],
+    enabled: isAuthenticated,
   });
 
   const { data: campusInvites = [] } = useQuery<CampusInviteSubmission[]>({
-    queryKey: ['/api/admin/forms/campus-invite'],
-    queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/forms/campus-invite');
-      if (!res.ok) throw new Error('Failed to fetch campus invites');
-      return res.json();
-    },
-    enabled: isAdmin,
+    queryKey: ['/api/forms/campus-invite/all'],
+    enabled: isAuthenticated,
   });
 
   const { data: contactGeneral = [] } = useQuery<ContactSubmission[]>({
-    queryKey: ['/api/admin/contact', { category: 'general' }],
+    queryKey: ['/api/contact/all', { category: 'general' }],
     queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/contact?category=general');
-      if (!res.ok) throw new Error('Failed to fetch contacts');
+      const res = await fetch('/api/contact/all?category=general');
+      if (!res.ok) return [];
       return res.json();
     },
-    enabled: isAdmin,
+    enabled: isAuthenticated,
   });
 
   const { data: contactPartnership = [] } = useQuery<ContactSubmission[]>({
-    queryKey: ['/api/admin/contact', { category: 'partnership' }],
+    queryKey: ['/api/contact/all', { category: 'partnership' }],
     queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/contact?category=partnership');
-      if (!res.ok) throw new Error('Failed to fetch contacts');
+      const res = await fetch('/api/contact/all?category=partnership');
+      if (!res.ok) return [];
       return res.json();
     },
-    enabled: isAdmin,
+    enabled: isAuthenticated,
   });
 
   const { data: contactCorporate = [] } = useQuery<ContactSubmission[]>({
-    queryKey: ['/api/admin/contact', { category: 'corporate' }],
+    queryKey: ['/api/contact/all', { category: 'corporate' }],
     queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/contact?category=corporate');
-      if (!res.ok) throw new Error('Failed to fetch contacts');
+      const res = await fetch('/api/contact/all?category=corporate');
+      if (!res.ok) return [];
       return res.json();
     },
-    enabled: isAdmin,
+    enabled: isAuthenticated,
   });
 
   const { data: contactCampus = [] } = useQuery<ContactSubmission[]>({
-    queryKey: ['/api/admin/contact', { category: 'campus' }],
+    queryKey: ['/api/contact/all', { category: 'campus' }],
     queryFn: async () => {
-      const res = await authenticatedFetch('/api/admin/contact?category=campus');
-      if (!res.ok) throw new Error('Failed to fetch contacts');
+      const res = await fetch('/api/contact/all?category=campus');
+      if (!res.ok) return [];
       return res.json();
     },
-    enabled: isAdmin,
+    enabled: isAuthenticated,
   });
 
   const createMutation = useMutation({
     mutationFn: async ({ type, data }: { type: string; data: any }) => {
-      const response = await authenticatedApiRequest('POST', `/api/admin/${type}`, data);
+      const response = await apiRequest('POST', `/api/${type}`, data);
       return response.json();
     },
     onSuccess: (_, variables) => {
       toast({ title: "Success", description: "Item created successfully" });
       setIsFormOpen(false);
       setEditingItem(null);
-      queryClient.invalidateQueries({ queryKey: [`/api/admin/${variables.type}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/${variables.type}`] });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -235,14 +245,14 @@ export default function Admin() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ type, id, data }: { type: string; id: string; data: any }) => {
-      const response = await authenticatedApiRequest('PATCH', `/api/admin/${type}/${id}`, data);
+      const response = await apiRequest('PATCH', `/api/${type}/${id}`, data);
       return response.json();
     },
     onSuccess: (_, variables) => {
       toast({ title: "Success", description: "Item updated successfully" });
       setIsFormOpen(false);
       setEditingItem(null);
-      queryClient.invalidateQueries({ queryKey: [`/api/admin/${variables.type}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/${variables.type}`] });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -251,12 +261,12 @@ export default function Admin() {
 
   const deleteMutation = useMutation({
     mutationFn: async ({ type, id }: { type: string; id: string }) => {
-      const response = await authenticatedApiRequest('DELETE', `/api/admin/${type}/${id}`);
+      const response = await apiRequest('DELETE', `/api/${type}/${id}`);
       return response.json();
     },
     onSuccess: (_, variables) => {
       toast({ title: "Success", description: "Item deleted successfully" });
-      queryClient.invalidateQueries({ queryKey: [`/api/admin/${variables.type}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/${variables.type}`] });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -265,7 +275,7 @@ export default function Admin() {
 
   const replyMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await authenticatedApiRequest('POST', '/api/admin/email-reply', data);
+      const response = await apiRequest('POST', '/api/email-reply', data);
       return response.json();
     },
     onSuccess: () => {
@@ -295,8 +305,50 @@ export default function Admin() {
     );
   }
 
-  if (!isAdmin) {
-    return null;
+  if (!isAuthenticated) {
+    return (
+      <main className="pt-20 min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30" data-testid="page-admin-login">
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-gradient-to-br from-kef-red to-kef-blue flex items-center justify-center">
+              <Lock className="w-8 h-8 text-white" />
+            </div>
+            <CardTitle className="text-2xl">Admin Panel</CardTitle>
+            <CardDescription>Enter the admin password to continue</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter admin password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  data-testid="input-admin-password"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-kef-red to-kef-blue text-white" 
+                disabled={isSubmitting}
+                data-testid="button-admin-login"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Authenticating...
+                  </>
+                ) : (
+                  'Access Admin Panel'
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </main>
+    );
   }
 
   const stats = {
@@ -480,7 +532,7 @@ export default function Admin() {
             <h1 className="text-3xl font-bold">Admin Panel</h1>
             <p className="text-muted-foreground">Manage your website content and submissions</p>
           </div>
-          <Button variant="outline" onClick={() => window.location.href = '/api/logout'}>
+          <Button variant="outline" onClick={handleLogout} data-testid="button-admin-logout">
             <LogOut className="w-4 h-4 mr-2" />
             Logout
           </Button>
