@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,6 +19,8 @@ import {
   Heart
 } from 'lucide-react';
 import teamImage from '@assets/generated_images/startup_team_collaboration_scene.png';
+import AuthModal from '@/components/auth/AuthModal';
+import { PartnerWithUsModal } from '@/components/FormModals';
 
 const missionPoints = [
   'To empower startups at every stage—from idea to scale',
@@ -55,6 +59,9 @@ export default function About() {
   const { ref: missionRef, isVisible: missionVisible } = useScrollAnimation(0.1);
   const { ref: objectivesRef, isVisible: objectivesVisible } = useScrollAnimation(0.1);
   const { ref: teamRef, isVisible: teamVisible } = useScrollAnimation(0.1);
+  const [, setLocation] = useLocation();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
 
   return (
     <main className="pt-20" data-testid="page-about">
@@ -253,16 +260,26 @@ export default function About() {
             <Button 
               size="lg"
               className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
+              onClick={() => setIsAuthModalOpen(true)}
+              data-testid="button-about-join"
             >
               Join the Forum
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline">
+            <Button 
+              size="lg" 
+              variant="outline"
+              onClick={() => setIsPartnerModalOpen(true)}
+              data-testid="button-about-partner"
+            >
               Partner With Us
             </Button>
           </div>
         </div>
       </section>
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <PartnerWithUsModal open={isPartnerModalOpen} onOpenChange={setIsPartnerModalOpen} />
     </main>
   );
 }
