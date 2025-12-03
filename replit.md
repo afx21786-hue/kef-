@@ -71,18 +71,30 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication and Authorization
 
-**Primary Authentication**: Firebase Authentication
+**Dual Authentication System**:
 
-**Supported Methods**:
-- Email/password authentication
-- Google OAuth sign-in
-- Graceful degradation when Firebase is not configured
+1. **Firebase Authentication** (for regular users):
+   - Email/password authentication
+   - Google OAuth sign-in
+   - Graceful degradation when Firebase is not configured
+   - AuthContext provides global authentication state
+   - Protected routes check authentication status
+   - Auth modal component for sign-in/sign-up flows
+   - Token-based session management via Firebase
 
-**Implementation Pattern**:
-- AuthContext provides global authentication state
-- Protected routes check authentication status
-- Auth modal component for sign-in/sign-up flows
-- Token-based session management via Firebase
+2. **Admin Panel Authentication** (session-based):
+   - Password-protected admin panel at `/admin`
+   - Server-side session-based authentication
+   - Admin password: 786954 (set via ADMIN_PASSWORD environment variable)
+   - Protected endpoints use `isAdminSession` middleware
+   - Endpoints: `/api/admin/login`, `/api/admin/logout`, `/api/admin/check`
+   - Protected form submission viewing endpoints:
+     - `/api/forms/apply/all`
+     - `/api/forms/register/all`
+     - `/api/forms/consultation/all`
+     - `/api/forms/advisory/all`
+     - `/api/forms/campus-invite/all`
+     - `/api/contact/all`
 
 **Fallback**: Local username/password schema exists in database for potential alternative authentication
 
