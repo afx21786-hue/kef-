@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { queryClient, authenticatedApiRequest, authenticatedFetch } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -89,72 +89,137 @@ export default function Admin() {
 
   const { data: resources = [], refetch: refetchResources } = useQuery<Resource[]>({
     queryKey: ['/api/admin/resources'],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/resources');
+      if (!res.ok) throw new Error('Failed to fetch resources');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: programs = [], refetch: refetchPrograms } = useQuery<Program[]>({
     queryKey: ['/api/admin/programs'],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/programs');
+      if (!res.ok) throw new Error('Failed to fetch programs');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: events = [], refetch: refetchEvents } = useQuery<Event[]>({
     queryKey: ['/api/admin/events'],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/events');
+      if (!res.ok) throw new Error('Failed to fetch events');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: membershipPlans = [], refetch: refetchPlans } = useQuery<MembershipPlan[]>({
     queryKey: ['/api/admin/membership-plans'],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/membership-plans');
+      if (!res.ok) throw new Error('Failed to fetch membership plans');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: applyForms = [] } = useQuery<ApplyFormSubmission[]>({
     queryKey: ['/api/admin/forms/apply'],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/forms/apply');
+      if (!res.ok) throw new Error('Failed to fetch apply forms');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: registerForms = [] } = useQuery<RegisterFormSubmission[]>({
     queryKey: ['/api/admin/forms/register'],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/forms/register');
+      if (!res.ok) throw new Error('Failed to fetch register forms');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: consultations = [] } = useQuery<ConsultationSubmission[]>({
     queryKey: ['/api/admin/forms/consultation'],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/forms/consultation');
+      if (!res.ok) throw new Error('Failed to fetch consultations');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: advisorySessions = [] } = useQuery<AdvisorySessionSubmission[]>({
     queryKey: ['/api/admin/forms/advisory'],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/forms/advisory');
+      if (!res.ok) throw new Error('Failed to fetch advisory sessions');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: campusInvites = [] } = useQuery<CampusInviteSubmission[]>({
     queryKey: ['/api/admin/forms/campus-invite'],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/forms/campus-invite');
+      if (!res.ok) throw new Error('Failed to fetch campus invites');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: contactGeneral = [] } = useQuery<ContactSubmission[]>({
     queryKey: ['/api/admin/contact', { category: 'general' }],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/contact?category=general');
+      if (!res.ok) throw new Error('Failed to fetch contacts');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: contactPartnership = [] } = useQuery<ContactSubmission[]>({
     queryKey: ['/api/admin/contact', { category: 'partnership' }],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/contact?category=partnership');
+      if (!res.ok) throw new Error('Failed to fetch contacts');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: contactCorporate = [] } = useQuery<ContactSubmission[]>({
     queryKey: ['/api/admin/contact', { category: 'corporate' }],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/contact?category=corporate');
+      if (!res.ok) throw new Error('Failed to fetch contacts');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: contactCampus = [] } = useQuery<ContactSubmission[]>({
     queryKey: ['/api/admin/contact', { category: 'campus' }],
+    queryFn: async () => {
+      const res = await authenticatedFetch('/api/admin/contact?category=campus');
+      if (!res.ok) throw new Error('Failed to fetch contacts');
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const createMutation = useMutation({
     mutationFn: async ({ type, data }: { type: string; data: any }) => {
-      const response = await apiRequest('POST', `/api/admin/${type}`, data);
+      const response = await authenticatedApiRequest('POST', `/api/admin/${type}`, data);
       return response.json();
     },
     onSuccess: (_, variables) => {
@@ -170,7 +235,7 @@ export default function Admin() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ type, id, data }: { type: string; id: string; data: any }) => {
-      const response = await apiRequest('PATCH', `/api/admin/${type}/${id}`, data);
+      const response = await authenticatedApiRequest('PATCH', `/api/admin/${type}/${id}`, data);
       return response.json();
     },
     onSuccess: (_, variables) => {
@@ -186,7 +251,7 @@ export default function Admin() {
 
   const deleteMutation = useMutation({
     mutationFn: async ({ type, id }: { type: string; id: string }) => {
-      const response = await apiRequest('DELETE', `/api/admin/${type}/${id}`);
+      const response = await authenticatedApiRequest('DELETE', `/api/admin/${type}/${id}`);
       return response.json();
     },
     onSuccess: (_, variables) => {
@@ -200,7 +265,7 @@ export default function Admin() {
 
   const replyMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/admin/email-reply', data);
+      const response = await authenticatedApiRequest('POST', '/api/admin/email-reply', data);
       return response.json();
     },
     onSuccess: () => {

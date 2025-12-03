@@ -218,7 +218,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/resources", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/resources", requireFirebaseAdmin, async (req, res) => {
     try {
       const resources = await storage.getResources();
       res.json(resources);
@@ -228,7 +228,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/resources", isAuthenticated, isAdmin, async (req, res) => {
+  app.post("/api/admin/resources", requireFirebaseAdmin, async (req, res) => {
     try {
       const parsed = insertResourceSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -242,7 +242,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/resources/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/resources/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const resource = await storage.updateResource(req.params.id, req.body);
       if (!resource) {
@@ -255,7 +255,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/admin/resources/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.delete("/api/admin/resources/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       await storage.deleteResource(req.params.id);
       res.json({ success: true });
@@ -265,7 +265,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/programs", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/programs", requireFirebaseAdmin, async (req, res) => {
     try {
       const programs = await storage.getPrograms();
       res.json(programs);
@@ -275,7 +275,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/programs", isAuthenticated, isAdmin, async (req, res) => {
+  app.post("/api/admin/programs", requireFirebaseAdmin, async (req, res) => {
     try {
       const parsed = insertProgramSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -289,7 +289,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/programs/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/programs/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const program = await storage.updateProgram(req.params.id, req.body);
       if (!program) {
@@ -302,7 +302,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/admin/programs/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.delete("/api/admin/programs/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       await storage.deleteProgram(req.params.id);
       res.json({ success: true });
@@ -312,7 +312,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/events", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/events", requireFirebaseAdmin, async (req, res) => {
     try {
       const events = await storage.getEvents();
       res.json(events);
@@ -322,7 +322,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/events", isAuthenticated, isAdmin, async (req, res) => {
+  app.post("/api/admin/events", requireFirebaseAdmin, async (req, res) => {
     try {
       const parsed = insertEventSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -336,7 +336,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/events/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/events/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const event = await storage.updateEvent(req.params.id, req.body);
       if (!event) {
@@ -349,7 +349,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/admin/events/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.delete("/api/admin/events/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       await storage.deleteEvent(req.params.id);
       res.json({ success: true });
@@ -359,7 +359,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/membership-plans", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/membership-plans", requireFirebaseAdmin, async (req, res) => {
     try {
       const plans = await storage.getMembershipPlans();
       res.json(plans);
@@ -369,7 +369,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/membership-plans", isAuthenticated, isAdmin, async (req, res) => {
+  app.post("/api/admin/membership-plans", requireFirebaseAdmin, async (req, res) => {
     try {
       const parsed = insertMembershipPlanSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -383,7 +383,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/membership-plans/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/membership-plans/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const plan = await storage.updateMembershipPlan(req.params.id, req.body);
       if (!plan) {
@@ -396,7 +396,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/admin/membership-plans/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.delete("/api/admin/membership-plans/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       await storage.deleteMembershipPlan(req.params.id);
       res.json({ success: true });
@@ -406,7 +406,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/forms/apply", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/forms/apply", requireFirebaseAdmin, async (req, res) => {
     try {
       const submissions = await storage.getApplyFormSubmissions();
       res.json(submissions);
@@ -416,7 +416,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/forms/apply/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/forms/apply/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const { status, adminNotes } = req.body;
       const submission = await storage.updateApplyFormStatus(req.params.id, status, adminNotes);
@@ -427,7 +427,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/forms/register", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/forms/register", requireFirebaseAdmin, async (req, res) => {
     try {
       const submissions = await storage.getRegisterFormSubmissions();
       res.json(submissions);
@@ -437,7 +437,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/forms/register/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/forms/register/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const { status, adminNotes } = req.body;
       const submission = await storage.updateRegisterFormStatus(req.params.id, status, adminNotes);
@@ -448,7 +448,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/forms/consultation", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/forms/consultation", requireFirebaseAdmin, async (req, res) => {
     try {
       const submissions = await storage.getConsultationSubmissions();
       res.json(submissions);
@@ -458,7 +458,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/forms/consultation/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/forms/consultation/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const { status, adminNotes } = req.body;
       const submission = await storage.updateConsultationStatus(req.params.id, status, adminNotes);
@@ -469,7 +469,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/forms/advisory", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/forms/advisory", requireFirebaseAdmin, async (req, res) => {
     try {
       const submissions = await storage.getAdvisorySessionSubmissions();
       res.json(submissions);
@@ -479,7 +479,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/forms/advisory/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/forms/advisory/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const { status, adminNotes } = req.body;
       const submission = await storage.updateAdvisorySessionStatus(req.params.id, status, adminNotes);
@@ -490,7 +490,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/forms/campus-invite", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/forms/campus-invite", requireFirebaseAdmin, async (req, res) => {
     try {
       const submissions = await storage.getCampusInviteSubmissions();
       res.json(submissions);
@@ -500,7 +500,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/forms/campus-invite/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/forms/campus-invite/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const { status, adminNotes } = req.body;
       const submission = await storage.updateCampusInviteStatus(req.params.id, status, adminNotes);
@@ -511,7 +511,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/contact", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/contact", requireFirebaseAdmin, async (req, res) => {
     try {
       const category = req.query.category as string | undefined;
       const submissions = await storage.getContactSubmissions(category);
@@ -522,7 +522,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/admin/contact/:id", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/admin/contact/:id", requireFirebaseAdmin, async (req, res) => {
     try {
       const { status, adminNotes } = req.body;
       const submission = await storage.updateContactStatus(req.params.id, status, adminNotes);
@@ -533,7 +533,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/email-reply", isAuthenticated, isAdmin, async (req: any, res) => {
+  app.post("/api/admin/email-reply", requireFirebaseAdmin, async (req: any, res) => {
     try {
       const { submissionId, submissionType, recipientEmail, subject, body } = req.body;
       const userId = req.user.claims.sub;
@@ -569,7 +569,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/email-replies/:submissionId/:submissionType", isAuthenticated, isAdmin, async (req, res) => {
+  app.get("/api/admin/email-replies/:submissionId/:submissionType", requireFirebaseAdmin, async (req, res) => {
     try {
       const replies = await storage.getEmailReplies(req.params.submissionId, req.params.submissionType);
       res.json(replies);
