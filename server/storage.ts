@@ -19,6 +19,7 @@ import { eq, desc, sql } from "drizzle-orm";
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  upsertFirebaseUser(user: UpsertUser): Promise<User>;
   getUserCount(): Promise<number>;
 
   getResources(): Promise<Resource[]>;
@@ -100,6 +101,34 @@ export class DatabaseStorage implements IStorage {
   async getUserCount(): Promise<number> {
     const result = await db.select({ count: sql<number>`count(*)` }).from(users);
     return Number(result[0]?.count || 0);
+  }
+
+  async upsertFirebaseUser(userData: UpsertUser): Promise<User> {
+    // Check if user exists first
+    const existingUser = await this.getUser(userData.id!);
+    
+    if (existingUser) {
+      // User exists - update profile info but preserve role
+      const [user] = await db
+        .update(users)
+        .set({
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userData.id!))
+        .returning();
+      return user;
+    } else {
+      // New user - insert with provided role
+      const [user] = await db
+        .insert(users)
+        .values(userData)
+        .returning();
+      return user;
+    }
   }
 
   async getResources(): Promise<Resource[]> {

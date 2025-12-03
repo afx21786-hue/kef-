@@ -64,12 +64,53 @@ export { auth };
 
 const googleProvider = new GoogleAuthProvider();
 
+// Get the current user's ID token for API authentication
+export async function getIdToken(): Promise<string | null> {
+  if (!auth?.currentUser) {
+    return null;
+  }
+  try {
+    return await auth.currentUser.getIdToken();
+  } catch (error) {
+    console.error('Error getting ID token:', error);
+    return null;
+  }
+}
+
+// Sync Firebase user to PostgreSQL database
+async function syncUserToDatabase(user: User) {
+  try {
+    // Get the ID token for authentication
+    const idToken = await user.getIdToken();
+    
+    const response = await fetch('/api/auth/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+      }),
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to sync user to database');
+    }
+  } catch (error) {
+    console.error('Error syncing user to database:', error);
+  }
+}
+
 export async function signInWithGoogle() {
   if (!auth) {
     return { user: null, error: 'Authentication is not configured. Please contact the administrator.' };
   }
   try {
     const result = await signInWithPopup(auth, googleProvider);
+    // Sync user to PostgreSQL database
+    await syncUserToDatabase(result.user);
     return { user: result.user, error: null };
   } catch (error: any) {
     return { user: null, error: error.message };
@@ -82,6 +123,8 @@ export async function signInWithEmail(email: string, password: string) {
   }
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
+    // Sync user to PostgreSQL database
+    await syncUserToDatabase(result.user);
     return { user: result.user, error: null };
   } catch (error: any) {
     let message = error.message;
@@ -102,6 +145,8 @@ export async function signUpWithEmail(email: string, password: string) {
   }
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
+    // Sync user to PostgreSQL database
+    await syncUserToDatabase(result.user);
     return { user: result.user, error: null };
   } catch (error: any) {
     let message = error.message;
@@ -133,7 +178,13 @@ export function onAuthChange(callback: (user: User | null) => void) {
     callback(null);
     return () => {};
   }
-  return onAuthStateChanged(auth, callback);
+  return onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      // Sync user to database on auth state change
+      await syncUserToDatabase(user);
+    }
+    callback(user);
+  });
 }
 
 // Firestore exports

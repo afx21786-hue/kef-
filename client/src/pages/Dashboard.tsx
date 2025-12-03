@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useAuth as useServerAuth } from '@/hooks/useAuth';
 import { logOut } from '@/lib/firebase';
@@ -43,6 +44,13 @@ export default function Dashboard() {
     }
   };
 
+  // Redirect to home if not logged in (using useEffect to avoid render warning)
+  useEffect(() => {
+    if (!loading && !user) {
+      setLocation('/');
+    }
+  }, [loading, user, setLocation]);
+
   if (loading) {
     return (
       <main className="pt-20 min-h-screen flex items-center justify-center">
@@ -52,7 +60,6 @@ export default function Dashboard() {
   }
 
   if (!user) {
-    setLocation('/');
     return null;
   }
 

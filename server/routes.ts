@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
+import { requireFirebaseAuth, requireFirebaseAdmin } from "./firebaseAdmin";
 import { sendEmail, formatReplyEmail } from "./email";
 import { 
   insertResourceSchema, insertProgramSchema, insertEventSchema, 
@@ -15,6 +16,68 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   await setupAuth(app);
+
+  // Firebase user sync endpoint - secured with Firebase Auth
+  app.post('/api/auth/sync', requireFirebaseAuth, async (req: any, res) => {
+    try {
+      const decodedToken = req.firebaseUser;
+      const { displayName, photoURL } = req.body;
+      
+      // Use the verified UID from the token, not from request body
+      const uid = decodedToken.uid;
+      const email = decodedToken.email;
+      
+      if (!uid || !email) {
+        return res.status(400).json({ message: "Invalid token: missing uid or email" });
+      }
+
+      // Check if this is the first user (they become admin)
+      const userCount = await storage.getUserCount();
+      const isFirstUser = userCount === 0;
+      
+      // Parse display name into first and last name
+      const nameParts = (displayName || decodedToken.name || '').split(' ');
+      const firstName = nameParts[0] || null;
+      const lastName = nameParts.slice(1).join(' ') || null;
+      
+      // Upsert the user - first user becomes admin
+      const user = await storage.upsertFirebaseUser({
+        id: uid,
+        email,
+        firstName,
+        lastName,
+        profileImageUrl: photoURL || decodedToken.picture || null,
+        role: isFirstUser ? "admin" : "user",
+      });
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error syncing Firebase user:", error);
+      res.status(500).json({ message: "Failed to sync user" });
+    }
+  });
+
+  // Get current Firebase user from database - secured with Firebase Auth
+  app.get('/api/auth/firebase-user/:uid', requireFirebaseAuth, async (req: any, res) => {
+    try {
+      const decodedToken = req.firebaseUser;
+      const requestedUid = req.params.uid;
+      
+      // Only allow users to fetch their own data
+      if (decodedToken.uid !== requestedUid) {
+        return res.status(403).json({ message: "Forbidden: Cannot access other user's data" });
+      }
+      
+      const user = await storage.getUser(requestedUid);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching Firebase user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
 
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
