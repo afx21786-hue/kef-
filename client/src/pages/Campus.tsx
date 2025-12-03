@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,6 +18,7 @@ import {
   Star,
   CheckCircle
 } from 'lucide-react';
+import { CampusInviteModal, ApplyFormModal } from '@/components/FormModals';
 
 const workshops = [
   { title: 'Business Model Canvas', duration: '4 hours', level: 'Beginner' },
@@ -37,6 +40,9 @@ const ambassadorBenefits = [
 
 export default function Campus() {
   const { ref, isVisible } = useScrollAnimation(0.1);
+  const [, setLocation] = useLocation();
+  const [isCampusInviteModalOpen, setIsCampusInviteModalOpen] = useState(false);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   return (
     <main className="pt-20" data-testid="page-campus">
@@ -96,7 +102,11 @@ export default function Campus() {
           </div>
 
           <div className="text-center mt-12">
-            <Button className="bg-gradient-to-r from-kef-blue to-kef-red text-white border-0">
+            <Button 
+              className="bg-gradient-to-r from-kef-blue to-kef-red text-white border-0"
+              onClick={() => setIsCampusInviteModalOpen(true)}
+              data-testid="button-campus-invite"
+            >
               Invite KEF to Your Campus
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -177,7 +187,11 @@ export default function Campus() {
                   We help institutions set up startup labs, innovation cells, 
                   mini incubators, and entrepreneurship clubs.
                 </p>
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => setLocation('/programs')}
+                  data-testid="button-campus-learn-more"
+                >
                   Learn More
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -214,7 +228,11 @@ export default function Campus() {
                   </div>
                 ))}
               </div>
-              <Button className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0">
+              <Button 
+                className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
+                onClick={() => setIsApplyModalOpen(true)}
+                data-testid="button-campus-apply"
+              >
                 Apply Now
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -238,6 +256,9 @@ export default function Campus() {
           </div>
         </div>
       </section>
+
+      <CampusInviteModal open={isCampusInviteModalOpen} onOpenChange={setIsCampusInviteModalOpen} />
+      <ApplyFormModal open={isApplyModalOpen} onOpenChange={setIsApplyModalOpen} />
     </main>
   );
 }

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +20,7 @@ import {
   Rocket,
   ExternalLink
 } from 'lucide-react';
+import { AdvisorySessionModal } from '@/components/FormModals';
 
 const advisoryServices = [
   {
@@ -98,6 +101,8 @@ const featuredStartups = [
 
 export default function StartupSupport() {
   const { ref, isVisible } = useScrollAnimation(0.1);
+  const [, setLocation] = useLocation();
+  const [isAdvisoryModalOpen, setIsAdvisoryModalOpen] = useState(false);
 
   return (
     <main className="pt-20" data-testid="page-startup-support">
@@ -150,7 +155,11 @@ export default function StartupSupport() {
           </div>
 
           <div className="text-center mt-12">
-            <Button className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0">
+            <Button 
+              className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
+              onClick={() => setIsAdvisoryModalOpen(true)}
+              data-testid="button-advisory-session"
+            >
               Book Advisory Session
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -271,13 +280,19 @@ export default function StartupSupport() {
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => setLocation('/startups')}
+              data-testid="button-view-startups"
+            >
               View All Startups
               <ExternalLink className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
       </section>
+
+      <AdvisorySessionModal open={isAdvisoryModalOpen} onOpenChange={setIsAdvisoryModalOpen} />
     </main>
   );
 }
