@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import {
   CheckCircle,
   GraduationCap
 } from 'lucide-react';
+import { ApplyFormModal, ConsultationModal } from '@/components/FormModals';
 
 const programs = [
   {
@@ -146,6 +148,8 @@ const programs = [
 
 export default function Programs() {
   const { ref, isVisible } = useScrollAnimation(0.1);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
 
   return (
     <main className="pt-20" data-testid="page-programs">
@@ -213,7 +217,11 @@ export default function Programs() {
                             </span>
                           </div>
                         </div>
-                        <Button className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0">
+                        <Button 
+                          className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
+                          onClick={() => setIsApplyModalOpen(true)}
+                          data-testid={`button-apply-${program.id}`}
+                        >
                           Apply Now
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
@@ -253,12 +261,17 @@ export default function Programs() {
           <Button 
             size="lg"
             className="bg-gradient-to-r from-kef-yellow to-kef-red text-white border-0"
+            onClick={() => setIsConsultationModalOpen(true)}
+            data-testid="button-programs-consultation"
           >
             Book a Consultation
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </section>
+
+      <ApplyFormModal open={isApplyModalOpen} onOpenChange={setIsApplyModalOpen} />
+      <ConsultationModal open={isConsultationModalOpen} onOpenChange={setIsConsultationModalOpen} />
     </main>
   );
 }
