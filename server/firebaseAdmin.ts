@@ -10,18 +10,23 @@ function ensureInitialized() {
     
     if (serviceAccountKey) {
       try {
-        // Handle potential escape issues with the JSON
         let cleanedKey = serviceAccountKey.trim();
+        
         if (cleanedKey.startsWith('"') && cleanedKey.endsWith('"')) {
           cleanedKey = cleanedKey.slice(1, -1);
         }
-        cleanedKey = cleanedKey.replace(/\\n/g, '\n');
+        
+        // Protect \n sequences, remove actual newlines, then restore
+        cleanedKey = cleanedKey.replace(/\\\\n/g, '___NEWLINE___');
+        cleanedKey = cleanedKey.replace(/[\r\n]/g, '');
+        cleanedKey = cleanedKey.replace(/___NEWLINE___/g, '\\n');
         
         const serviceAccount = JSON.parse(cleanedKey);
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
           projectId: serviceAccount.project_id || projectId,
         });
+        console.log('Firebase Admin SDK initialized with service account');
       } catch (parseError) {
         console.error('Failed to parse service account key:', parseError);
         admin.initializeApp({ projectId: projectId });
@@ -29,7 +34,6 @@ function ensureInitialized() {
     } else {
       admin.initializeApp({ projectId: projectId });
     }
-    console.log('Firebase Admin SDK initialized');
   }
 }
 

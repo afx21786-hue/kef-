@@ -25,12 +25,21 @@ function initializeFirebaseAdmin() {
       try {
         // Handle potential escape issues with the JSON
         let cleanedKey = serviceAccountKey.trim();
+        
         // If it starts with a quote, it might be double-escaped
         if (cleanedKey.startsWith('"') && cleanedKey.endsWith('"')) {
           cleanedKey = cleanedKey.slice(1, -1);
         }
-        // Replace escaped newlines with actual newlines
-        cleanedKey = cleanedKey.replace(/\\n/g, '\n');
+        
+        // Handle escaped characters that might cause issues
+        // First, protect the \n sequences in private_key by temporarily replacing them
+        cleanedKey = cleanedKey.replace(/\\\\n/g, '___NEWLINE___');
+        
+        // Remove any actual newlines/carriage returns that shouldn't be there
+        cleanedKey = cleanedKey.replace(/[\r\n]/g, '');
+        
+        // Restore the \n sequences
+        cleanedKey = cleanedKey.replace(/___NEWLINE___/g, '\\n');
         
         const serviceAccount = JSON.parse(cleanedKey);
         admin.initializeApp({
