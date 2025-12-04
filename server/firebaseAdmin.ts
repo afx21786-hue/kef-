@@ -10,10 +10,17 @@ function ensureInitialized() {
     
     if (serviceAccountKey) {
       try {
-        const serviceAccount = JSON.parse(serviceAccountKey);
+        // Handle potential escape issues with the JSON
+        let cleanedKey = serviceAccountKey.trim();
+        if (cleanedKey.startsWith('"') && cleanedKey.endsWith('"')) {
+          cleanedKey = cleanedKey.slice(1, -1);
+        }
+        cleanedKey = cleanedKey.replace(/\\n/g, '\n');
+        
+        const serviceAccount = JSON.parse(cleanedKey);
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
-          projectId: projectId,
+          projectId: serviceAccount.project_id || projectId,
         });
       } catch (parseError) {
         console.error('Failed to parse service account key:', parseError);

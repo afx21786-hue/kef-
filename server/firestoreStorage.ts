@@ -23,19 +23,30 @@ function initializeFirebaseAdmin() {
     
     if (serviceAccountKey) {
       try {
-        const serviceAccount = JSON.parse(serviceAccountKey);
+        // Handle potential escape issues with the JSON
+        let cleanedKey = serviceAccountKey.trim();
+        // If it starts with a quote, it might be double-escaped
+        if (cleanedKey.startsWith('"') && cleanedKey.endsWith('"')) {
+          cleanedKey = cleanedKey.slice(1, -1);
+        }
+        // Replace escaped newlines with actual newlines
+        cleanedKey = cleanedKey.replace(/\\n/g, '\n');
+        
+        const serviceAccount = JSON.parse(cleanedKey);
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
-          projectId: projectId,
+          projectId: serviceAccount.project_id || projectId,
         });
+        console.log('Firebase Admin SDK initialized with service account');
       } catch (parseError) {
         console.error('Failed to parse service account key:', parseError);
+        console.log('Initializing Firebase without credentials (limited functionality)');
         admin.initializeApp({ projectId: projectId });
       }
     } else {
+      console.log('No service account key found, initializing without credentials');
       admin.initializeApp({ projectId: projectId });
     }
-    console.log('Firebase Admin SDK initialized with Firestore');
   }
 }
 
