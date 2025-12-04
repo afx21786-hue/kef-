@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useAuth as useServerAuth } from '@/hooks/useAuth';
 import { logOut } from '@/lib/firebase';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { ApplyFormModal, AdvisorySessionModal } from '@/components/FormModals';
 import { 
   User, 
   LogOut, 
@@ -26,6 +27,8 @@ export default function Dashboard() {
   const { isAdmin } = useServerAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isAdvisoryModalOpen, setIsAdvisoryModalOpen] = useState(false);
 
   const handleLogout = async () => {
     const { error } = await logOut();
@@ -199,7 +202,12 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setLocation('/programs')}
+                  data-testid="button-explore-programs"
+                >
                   Explore Programs
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -214,10 +222,18 @@ export default function Dashboard() {
                 Explore our programs and accelerate your entrepreneurial journey
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0">
+                <Button 
+                  className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
+                  onClick={() => setIsApplyModalOpen(true)}
+                  data-testid="button-apply-accelerator"
+                >
                   Apply to Accelerator
                 </Button>
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsAdvisoryModalOpen(true)}
+                  data-testid="button-book-advisory"
+                >
                   Book Advisory Session
                 </Button>
               </div>
@@ -225,6 +241,15 @@ export default function Dashboard() {
           </Card>
         </div>
       </section>
+
+      <ApplyFormModal 
+        open={isApplyModalOpen} 
+        onOpenChange={setIsApplyModalOpen} 
+      />
+      <AdvisorySessionModal 
+        open={isAdvisoryModalOpen} 
+        onOpenChange={setIsAdvisoryModalOpen} 
+      />
     </main>
   );
 }
