@@ -190,7 +190,7 @@ export default function Admin() {
   const { data: contactGeneral = [] } = useQuery<ContactSubmission[]>({
     queryKey: ['/api/contact/all', { category: 'general' }],
     queryFn: async () => {
-      const res = await fetch('/api/contact/all?category=general');
+      const res = await fetch('/api/contact/all?category=general', { credentials: 'include' });
       if (!res.ok) return [];
       return res.json();
     },
@@ -200,7 +200,7 @@ export default function Admin() {
   const { data: contactPartnership = [] } = useQuery<ContactSubmission[]>({
     queryKey: ['/api/contact/all', { category: 'partnership' }],
     queryFn: async () => {
-      const res = await fetch('/api/contact/all?category=partnership');
+      const res = await fetch('/api/contact/all?category=partnership', { credentials: 'include' });
       if (!res.ok) return [];
       return res.json();
     },
@@ -210,7 +210,7 @@ export default function Admin() {
   const { data: contactCorporate = [] } = useQuery<ContactSubmission[]>({
     queryKey: ['/api/contact/all', { category: 'corporate' }],
     queryFn: async () => {
-      const res = await fetch('/api/contact/all?category=corporate');
+      const res = await fetch('/api/contact/all?category=corporate', { credentials: 'include' });
       if (!res.ok) return [];
       return res.json();
     },
@@ -220,7 +220,7 @@ export default function Admin() {
   const { data: contactCampus = [] } = useQuery<ContactSubmission[]>({
     queryKey: ['/api/contact/all', { category: 'campus' }],
     queryFn: async () => {
-      const res = await fetch('/api/contact/all?category=campus');
+      const res = await fetch('/api/contact/all?category=campus', { credentials: 'include' });
       if (!res.ok) return [];
       return res.json();
     },
