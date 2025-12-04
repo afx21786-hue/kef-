@@ -79,6 +79,18 @@ function firestoreTimestamp() {
   return admin.firestore.FieldValue.serverTimestamp();
 }
 
+// Remove undefined values from objects before writing to Firestore
+// Firestore doesn't accept undefined values
+function sanitizeForFirestore<T extends Record<string, any>>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}
+
 export class FirestoreStorage implements IStorage {
   private db: admin.firestore.Firestore;
 
@@ -109,15 +121,16 @@ export class FirestoreStorage implements IStorage {
     const doc = await docRef.get();
     
     if (doc.exists) {
-      await docRef.update({
+      const updateData = sanitizeForFirestore({
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
         profileImageUrl: userData.profileImageUrl,
         updatedAt: now,
       });
+      await docRef.update(updateData);
     } else {
-      await docRef.set({
+      const setData = sanitizeForFirestore({
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
@@ -126,6 +139,7 @@ export class FirestoreStorage implements IStorage {
         createdAt: now,
         updatedAt: now,
       });
+      await docRef.set(setData);
     }
     
     return (await this.getUser(id))!;
@@ -143,15 +157,16 @@ export class FirestoreStorage implements IStorage {
     const doc = await docRef.get();
     
     if (doc.exists) {
-      await docRef.update({
+      const updateData = sanitizeForFirestore({
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
         profileImageUrl: userData.profileImageUrl,
         updatedAt: now,
       });
+      await docRef.update(updateData);
     } else {
-      await docRef.set({
+      const setData = sanitizeForFirestore({
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
@@ -160,6 +175,7 @@ export class FirestoreStorage implements IStorage {
         createdAt: now,
         updatedAt: now,
       });
+      await docRef.set(setData);
     }
     
     return (await this.getUser(id))!;
@@ -205,12 +221,13 @@ export class FirestoreStorage implements IStorage {
   async createResource(resource: InsertResource): Promise<Resource> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('resources').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...resource,
       isActive: resource.isActive ?? true,
       createdAt: now,
       updatedAt: now,
     });
+    await this.db.collection('resources').doc(id).set(setData);
     return (await this.getResource(id))!;
   }
 
@@ -219,10 +236,11 @@ export class FirestoreStorage implements IStorage {
     const doc = await docRef.get();
     if (!doc.exists) return undefined;
     
-    await docRef.update({
+    const updateData = sanitizeForFirestore({
       ...resource,
       updatedAt: firestoreTimestamp(),
     });
+    await docRef.update(updateData);
     return this.getResource(id);
   }
 
@@ -275,12 +293,13 @@ export class FirestoreStorage implements IStorage {
   async createProgram(program: InsertProgram): Promise<Program> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('programs').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...program,
       isActive: program.isActive ?? true,
       createdAt: now,
       updatedAt: now,
     });
+    await this.db.collection('programs').doc(id).set(setData);
     return (await this.getProgram(id))!;
   }
 
@@ -289,10 +308,11 @@ export class FirestoreStorage implements IStorage {
     const doc = await docRef.get();
     if (!doc.exists) return undefined;
     
-    await docRef.update({
+    const updateData = sanitizeForFirestore({
       ...program,
       updatedAt: firestoreTimestamp(),
     });
+    await docRef.update(updateData);
     return this.getProgram(id);
   }
 
@@ -345,13 +365,14 @@ export class FirestoreStorage implements IStorage {
   async createEvent(event: InsertEvent): Promise<Event> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('events').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...event,
       date: event.date instanceof Date ? admin.firestore.Timestamp.fromDate(event.date) : event.date,
       isActive: event.isActive ?? true,
       createdAt: now,
       updatedAt: now,
     });
+    await this.db.collection('events').doc(id).set(setData);
     return (await this.getEvent(id))!;
   }
 
@@ -365,7 +386,7 @@ export class FirestoreStorage implements IStorage {
       updateData.date = admin.firestore.Timestamp.fromDate(event.date);
     }
     
-    await docRef.update(updateData);
+    await docRef.update(sanitizeForFirestore(updateData));
     return this.getEvent(id);
   }
 
@@ -416,13 +437,14 @@ export class FirestoreStorage implements IStorage {
   async createMembershipPlan(plan: InsertMembershipPlan): Promise<MembershipPlan> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('membershipPlans').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...plan,
       isActive: plan.isActive ?? true,
       order: plan.order ?? 0,
       createdAt: now,
       updatedAt: now,
     });
+    await this.db.collection('membershipPlans').doc(id).set(setData);
     return (await this.getMembershipPlan(id))!;
   }
 
@@ -431,10 +453,11 @@ export class FirestoreStorage implements IStorage {
     const doc = await docRef.get();
     if (!doc.exists) return undefined;
     
-    await docRef.update({
+    const updateData = sanitizeForFirestore({
       ...plan,
       updatedAt: firestoreTimestamp(),
     });
+    await docRef.update(updateData);
     return this.getMembershipPlan(id);
   }
 
@@ -467,12 +490,13 @@ export class FirestoreStorage implements IStorage {
   async createApplyFormSubmission(submission: InsertApplyForm): Promise<ApplyFormSubmission> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('applyFormSubmissions').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...submission,
       status: 'pending',
       adminNotes: null,
       createdAt: now,
     });
+    await this.db.collection('applyFormSubmissions').doc(id).set(setData);
     const doc = await this.db.collection('applyFormSubmissions').doc(id).get();
     const data = doc.data()!;
     return {
@@ -541,12 +565,13 @@ export class FirestoreStorage implements IStorage {
   async createRegisterFormSubmission(submission: InsertRegisterForm): Promise<RegisterFormSubmission> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('registerFormSubmissions').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...submission,
       status: 'pending',
       adminNotes: null,
       createdAt: now,
     });
+    await this.db.collection('registerFormSubmissions').doc(id).set(setData);
     const doc = await this.db.collection('registerFormSubmissions').doc(id).get();
     const data = doc.data()!;
     return {
@@ -618,12 +643,13 @@ export class FirestoreStorage implements IStorage {
   async createConsultationSubmission(submission: InsertConsultation): Promise<ConsultationSubmission> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('consultationSubmissions').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...submission,
       status: 'pending',
       adminNotes: null,
       createdAt: now,
     });
+    await this.db.collection('consultationSubmissions').doc(id).set(setData);
     const doc = await this.db.collection('consultationSubmissions').doc(id).get();
     const data = doc.data()!;
     return {
@@ -693,12 +719,13 @@ export class FirestoreStorage implements IStorage {
   async createAdvisorySessionSubmission(submission: InsertAdvisorySession): Promise<AdvisorySessionSubmission> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('advisorySessionSubmissions').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...submission,
       status: 'pending',
       adminNotes: null,
       createdAt: now,
     });
+    await this.db.collection('advisorySessionSubmissions').doc(id).set(setData);
     const doc = await this.db.collection('advisorySessionSubmissions').doc(id).get();
     const data = doc.data()!;
     return {
@@ -770,12 +797,13 @@ export class FirestoreStorage implements IStorage {
   async createCampusInviteSubmission(submission: InsertCampusInvite): Promise<CampusInviteSubmission> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('campusInviteSubmissions').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...submission,
       status: 'pending',
       adminNotes: null,
       createdAt: now,
     });
+    await this.db.collection('campusInviteSubmissions').doc(id).set(setData);
     const doc = await this.db.collection('campusInviteSubmissions').doc(id).get();
     const data = doc.data()!;
     return {
@@ -852,12 +880,13 @@ export class FirestoreStorage implements IStorage {
   async createContactSubmission(submission: InsertContact): Promise<ContactSubmission> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('contactSubmissions').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...submission,
       status: 'pending',
       adminNotes: null,
       createdAt: now,
     });
+    await this.db.collection('contactSubmissions').doc(id).set(setData);
     const doc = await this.db.collection('contactSubmissions').doc(id).get();
     const data = doc.data()!;
     return {
@@ -903,10 +932,11 @@ export class FirestoreStorage implements IStorage {
   async createEmailReply(reply: InsertEmailReply): Promise<EmailReply> {
     const id = generateId();
     const now = firestoreTimestamp();
-    await this.db.collection('emailReplies').doc(id).set({
+    const setData = sanitizeForFirestore({
       ...reply,
       sentAt: now,
     });
+    await this.db.collection('emailReplies').doc(id).set(setData);
     const doc = await this.db.collection('emailReplies').doc(id).get();
     const data = doc.data()!;
     return {
