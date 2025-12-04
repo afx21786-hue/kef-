@@ -55,19 +55,31 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage Solutions
 
-**Database ORM**: Drizzle ORM configured for PostgreSQL
+**Primary Database**: Firebase Firestore (NoSQL, real-time sync)
 
-**Schema Design**:
-- Users table with UUID primary keys
-- Username/password authentication fields
-- Schema validation using drizzle-zod
+**Firestore Collections**:
+- `users` - User profiles synced from Firebase Authentication
+- `resources` - Educational resources and materials
+- `programs` - KEF programs and initiatives
+- `events` - Upcoming and past events
+- `membershipPlans` - Available membership tiers
+- `applyFormSubmissions` - Program application submissions
+- `registerFormSubmissions` - Membership registration submissions
+- `consultationSubmissions` - Consultation request submissions
+- `advisorySessionSubmissions` - Advisory session requests
+- `campusInviteSubmissions` - Campus initiative invite requests
+- `contactSubmissions` - General contact form submissions
+- `emailReplies` - Admin email replies to submissions
 
-**Current State**: 
-- In-memory storage implementation (`MemStorage`) for development
-- Database schema defined and ready for PostgreSQL migration
-- Drizzle Kit configured for schema migrations
+**Server-side Storage**: 
+- `FirestoreStorage` class in `server/firestoreStorage.ts` implements the `IStorage` interface
+- Firebase Admin SDK initialized with service account credentials
+- All data operations sanitize undefined values before writing to Firestore
+- Real-time sync across all user accounts via Firestore's built-in synchronization
 
-**Note**: The application uses Drizzle ORM without a provisioned database currently. PostgreSQL can be added when needed using the existing schema and configuration.
+**Schema Validation**: drizzle-zod for schema validation (types defined in `shared/schema.ts`)
+
+**Email Integration**: Resend API for sending emails from the admin panel
 
 ### Authentication and Authorization
 
