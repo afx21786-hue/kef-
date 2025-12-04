@@ -229,7 +229,7 @@ export default function Admin() {
 
   const createMutation = useMutation({
     mutationFn: async ({ type, data }: { type: string; data: any }) => {
-      const response = await apiRequest('POST', `/api/${type}`, data);
+      const response = await apiRequest('POST', `/api/admin/${type}`, data);
       return response.json();
     },
     onSuccess: (_, variables) => {
@@ -245,7 +245,7 @@ export default function Admin() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ type, id, data }: { type: string; id: string; data: any }) => {
-      const response = await apiRequest('PATCH', `/api/${type}/${id}`, data);
+      const response = await apiRequest('PATCH', `/api/admin/${type}/${id}`, data);
       return response.json();
     },
     onSuccess: (_, variables) => {
@@ -261,7 +261,7 @@ export default function Admin() {
 
   const deleteMutation = useMutation({
     mutationFn: async ({ type, id }: { type: string; id: string }) => {
-      const response = await apiRequest('DELETE', `/api/${type}/${id}`);
+      const response = await apiRequest('DELETE', `/api/admin/${type}/${id}`);
       return response.json();
     },
     onSuccess: (_, variables) => {

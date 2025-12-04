@@ -104,11 +104,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertFirebaseUser(userData: UpsertUser): Promise<User> {
-    // Check if user exists first
+    // Use onConflictDoUpdate to handle race conditions properly
+    // First, check if user exists to determine if we should preserve the role
     const existingUser = await this.getUser(userData.id!);
     
     if (existingUser) {
-      // User exists - update profile info but preserve role
+      // User exists - update profile info but preserve their existing role
       const [user] = await db
         .update(users)
         .set({
@@ -122,10 +123,20 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return user;
     } else {
-      // New user - insert with provided role
+      // New user - use onConflictDoUpdate to handle race conditions
       const [user] = await db
         .insert(users)
         .values(userData)
+        .onConflictDoUpdate({
+          target: users.id,
+          set: {
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            profileImageUrl: userData.profileImageUrl,
+            updatedAt: new Date(),
+          },
+        })
         .returning();
       return user;
     }
