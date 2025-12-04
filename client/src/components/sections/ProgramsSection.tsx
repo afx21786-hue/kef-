@@ -1,10 +1,12 @@
 import { useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, Tent, Building2, Coffee, Stethoscope, FlaskConical } from 'lucide-react';
+import { ArrowRight, Tent, Building2, Coffee, Stethoscope, FlaskConical, Rocket } from 'lucide-react';
+import type { Program } from '@shared/schema';
 
-const programs = [
+const signaturePrograms = [
   {
     icon: Tent,
     title: 'Startup Boot Camp',
@@ -47,9 +49,21 @@ const programs = [
   },
 ];
 
+const gradients = [
+  'from-kef-red/20 to-rose-500/20',
+  'from-kef-blue/20 to-cyan-500/20',
+  'from-kef-yellow/20 to-orange-500/20',
+  'from-purple-500/20 to-pink-500/20',
+  'from-emerald-500/20 to-teal-500/20',
+];
+
 export default function ProgramsSection() {
   const { ref, isVisible } = useScrollAnimation(0.1);
   const [, setLocation] = useLocation();
+
+  const { data: dynamicPrograms = [] } = useQuery<Program[]>({
+    queryKey: ['/api/programs'],
+  });
 
   return (
     <section 
@@ -74,9 +88,9 @@ export default function ProgramsSection() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {programs.map((program, index) => (
+          {signaturePrograms.map((program, index) => (
             <Card
-              key={index}
+              key={`signature-${index}`}
               className={`group relative overflow-visible border-border hover-elevate transition-all duration-500 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
               } ${index === 4 ? 'md:col-span-2 lg:col-span-1' : ''}`}
@@ -96,6 +110,35 @@ export default function ProgramsSection() {
                   <div className="flex items-center gap-2 text-sm">
                     <span className="font-medium text-kef-blue">{program.outcome}</span>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {dynamicPrograms.map((program, index) => (
+            <Card
+              key={program.id}
+              className={`group relative overflow-visible border-border hover-elevate transition-all duration-500 ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+              }`}
+              style={{ transitionDelay: `${(signaturePrograms.length + index) * 100}ms` }}
+              data-testid={`program-card-dynamic-${program.id}`}
+            >
+              <CardContent className="p-6">
+                <div className={`absolute -top-5 left-6 p-4 rounded-xl bg-gradient-to-br ${gradients[index % gradients.length]} border border-border shadow-lg`}>
+                  <Rocket className="w-6 h-6 text-kef-blue" />
+                </div>
+                
+                <div className="pt-8">
+                  <h3 className="text-xl font-semibold mb-3">{program.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                    {program.description}
+                  </p>
+                  {program.category && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-medium text-kef-blue">{program.category}</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
