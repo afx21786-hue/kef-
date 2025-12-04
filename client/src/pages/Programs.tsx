@@ -1,155 +1,41 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { 
   ArrowRight, 
-  Tent, 
-  Building2, 
-  Coffee, 
-  Stethoscope, 
-  FlaskConical,
   Rocket,
   Users,
   CheckCircle,
-  GraduationCap
+  Loader2
 } from 'lucide-react';
 import { ApplyFormModal, ConsultationModal } from '@/components/FormModals';
+import type { Program } from '@shared/schema';
 
-const programs = [
-  {
-    id: 'bootcamp',
-    icon: Tent,
-    title: 'Startup Boot Camp',
-    tagline: 'Transforming Mindsets',
-    description: 'Both residential and day camps where participants learn to think like entrepreneurs. The camp includes powerful workshops, business model creation, idea validation, field assignments, pitching sessions, and mentor interactions.',
-    whoCanJoin: 'Students, founders, aspirants',
-    outcome: 'Mindset → Idea → Action → Pitch',
-    features: [
-      'Intensive entrepreneurship workshops',
-      'Business model canvas training',
-      'Idea validation techniques',
-      'Real-world field assignments',
-      'Pitch preparation and practice',
-      'One-on-one mentor sessions',
-    ],
-    color: 'from-kef-red to-rose-500',
-  },
-  {
-    id: 'conclaves',
-    icon: Building2,
-    title: 'Business Conclaves',
-    tagline: 'Connect. Collaborate. Grow.',
-    description: 'Large-scale gatherings where founders, investors, mentors, thought leaders, and students connect and collaborate. These events create lasting partnerships and open doors to new opportunities.',
-    whoCanJoin: 'Entrepreneurs, investors, students, mentors',
-    outcome: 'Network → Collaborate → Scale',
-    features: [
-      'Keynote sessions by industry leaders',
-      'Panel discussions on trending topics',
-      'Startup exhibition and demos',
-      'Investor meet and greet',
-      'Networking dinners',
-      'B2B matchmaking sessions',
-    ],
-    color: 'from-kef-blue to-cyan-500',
-  },
-  {
-    id: 'founder-circle',
-    icon: Coffee,
-    title: 'Founder Circle Meets',
-    tagline: 'Exclusive Conversations',
-    description: 'Exclusive curated networking dinners and tea sessions bringing entrepreneurs and experts together for honest conversations and opportunities. Intimate settings for meaningful connections.',
-    whoCanJoin: 'Selected founders, business leaders',
-    outcome: 'Connect → Share → Support',
-    features: [
-      'Curated guest lists',
-      'Intimate dinner settings',
-      'No-agenda networking',
-      'Experience sharing sessions',
-      'Peer mentoring opportunities',
-      'Investment discussions',
-    ],
-    color: 'from-kef-yellow to-orange-500',
-  },
-  {
-    id: 'advisory',
-    icon: Stethoscope,
-    title: 'Startup Advisory Clinics',
-    tagline: 'Expert Guidance',
-    description: 'One-on-one mentoring and business advisory sessions covering all aspects of running a business. Get expert advice on finance, branding, HR, legal, marketing, and operations.',
-    whoCanJoin: 'Startups at any stage',
-    outcome: 'Diagnose → Advise → Transform',
-    features: [
-      'Financial planning & cash flow',
-      'Brand identity & positioning',
-      'Digital marketing strategy',
-      'Legal & compliance guidance',
-      'HR & team building',
-      'Operations optimization',
-    ],
-    color: 'from-purple-500 to-pink-500',
-  },
-  {
-    id: 'campus-labs',
-    icon: FlaskConical,
-    title: 'Campus Innovation Labs',
-    tagline: 'Nurturing Campus Entrepreneurs',
-    description: 'Building entrepreneurship clubs, innovation cells, startup labs, and student incubators in colleges across Kerala. Creating the next generation of founders from within campuses.',
-    whoCanJoin: 'Educational institutions, students',
-    outcome: 'Learn → Innovate → Launch',
-    features: [
-      'Entrepreneurship club setup',
-      'Innovation cell guidance',
-      'Student incubator programs',
-      'Faculty development training',
-      'Inter-college competitions',
-      'Industry mentorship connections',
-    ],
-    color: 'from-emerald-500 to-teal-500',
-  },
-  {
-    id: 'accelerator',
-    icon: Rocket,
-    title: 'Entrepreneurship Accelerator',
-    tagline: '12-Week Intensive Program',
-    description: 'A comprehensive 12-week accelerator program designed to take early-stage startups to the next level with structured curriculum, intensive mentorship, and a final demo day.',
-    whoCanJoin: 'Early-stage startups with MVP',
-    outcome: 'Build → Validate → Scale',
-    features: [
-      'Structured 12-week curriculum',
-      'Weekly mentor sessions',
-      'Product development support',
-      'Go-to-market strategy',
-      'Investor pitch preparation',
-      'Demo day with investors',
-    ],
-    color: 'from-amber-500 to-yellow-500',
-  },
-  {
-    id: 'student-forum',
-    icon: GraduationCap,
-    title: 'KEF Student Entrepreneurs Forum',
-    tagline: 'Student Entrepreneur Network',
-    description: 'A dedicated forum for student entrepreneurs to connect, learn, and grow together. Access to resources, mentors, and opportunities specifically designed for campus entrepreneurs.',
-    whoCanJoin: 'College students with startup ideas',
-    outcome: 'Learn → Connect → Launch',
-    features: [
-      'Student entrepreneur network',
-      'Access to resources & tools',
-      'Mentorship programs',
-      'Startup challenges & competitions',
-      'Campus ambassador program',
-      'Internship opportunities',
-    ],
-    color: 'from-rose-500 to-red-500',
-  },
+const gradients = [
+  'from-kef-red to-rose-500',
+  'from-kef-blue to-cyan-500',
+  'from-kef-yellow to-orange-500',
+  'from-purple-500 to-pink-500',
+  'from-emerald-500 to-teal-500',
+  'from-amber-500 to-yellow-500',
+  'from-rose-500 to-red-500',
 ];
 
 export default function Programs() {
   const { ref, isVisible } = useScrollAnimation(0.1);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+
+  const { data: programs = [], isLoading } = useQuery<Program[]>({
+    queryKey: ['/api/programs'],
+  });
+
+  const handleProgramClick = (program: Program) => {
+    setSelectedProgram(program);
+  };
 
   return (
     <main className="pt-20" data-testid="page-programs">
@@ -175,74 +61,123 @@ export default function Programs() {
             </p>
           </div>
 
-          <Tabs defaultValue="bootcamp" className="w-full">
-            <TabsList className="flex flex-wrap gap-2 h-auto bg-transparent p-0 mb-12">
-              {programs.map((program) => (
-                <TabsTrigger
-                  key={program.id}
-                  value={program.id}
-                  className="px-4 py-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <program.icon className="w-4 h-4 mr-2" />
-                  {program.title}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          {isLoading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="w-10 h-10 animate-spin text-kef-blue" />
+            </div>
+          ) : programs.length === 0 ? (
+            <div className="text-center py-20">
+              <Rocket className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Programs Coming Soon</h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                We're preparing exciting programs for you. Check back soon or contact us for more information.
+              </p>
+              <Button 
+                className="mt-6 bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
+                onClick={() => setIsConsultationModalOpen(true)}
+                data-testid="button-contact-programs"
+              >
+                Contact Us
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                {programs.map((program, index) => (
+                  <Card
+                    key={program.id}
+                    className={`group relative overflow-visible border-border hover-elevate cursor-pointer transition-all duration-500 ${
+                      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    } ${selectedProgram?.id === program.id ? 'ring-2 ring-kef-blue' : ''}`}
+                    style={{ transitionDelay: `${index * 100}ms` }}
+                    onClick={() => handleProgramClick(program)}
+                    data-testid={`program-card-${program.id}`}
+                  >
+                    <CardContent className="p-6">
+                      <div className={`absolute -top-5 left-6 p-4 rounded-xl bg-gradient-to-br ${gradients[index % gradients.length]} border border-border shadow-lg`}>
+                        <Rocket className="w-6 h-6 text-white" />
+                      </div>
+                      
+                      <div className="pt-8">
+                        <h3 className="text-xl font-semibold mb-3">{program.title}</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3">
+                          {program.description}
+                        </p>
+                        {program.category && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="font-medium text-kef-blue">{program.category}</span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
 
-            {programs.map((program) => (
-              <TabsContent key={program.id} value={program.id} className="mt-0">
-                <Card className="border-border">
+              {selectedProgram && (
+                <Card className={`border-border mb-12 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                   <CardContent className="p-8 md:p-12">
                     <div className="grid lg:grid-cols-2 gap-12">
                       <div>
-                        <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${program.color} mb-6`}>
-                          <program.icon className="w-8 h-8 text-white" />
+                        <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${gradients[programs.findIndex(p => p.id === selectedProgram.id) % gradients.length]} mb-6`}>
+                          <Rocket className="w-8 h-8 text-white" />
                         </div>
-                        <h2 className="text-3xl font-bold mb-2">{program.title}</h2>
-                        <p className="text-lg text-muted-foreground mb-6">{program.tagline}</p>
+                        <h2 className="text-3xl font-bold mb-2">{selectedProgram.title}</h2>
+                        {selectedProgram.category && (
+                          <p className="text-lg text-muted-foreground mb-6">{selectedProgram.category}</p>
+                        )}
                         <p className="text-foreground leading-relaxed mb-6">
-                          {program.description}
+                          {selectedProgram.description}
                         </p>
                         <div className="space-y-3 mb-8">
-                          <div className="flex items-center gap-3">
-                            <Users className="w-5 h-5 text-kef-blue" />
-                            <span className="text-muted-foreground">
-                              <strong>Who can join:</strong> {program.whoCanJoin}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Rocket className="w-5 h-5 text-kef-red" />
-                            <span className="text-muted-foreground">
-                              <strong>Outcome:</strong> {program.outcome}
-                            </span>
-                          </div>
+                          {selectedProgram.eligibility && (
+                            <div className="flex items-center gap-3">
+                              <Users className="w-5 h-5 text-kef-blue" />
+                              <span className="text-muted-foreground">
+                                <strong>Eligibility:</strong> {selectedProgram.eligibility}
+                              </span>
+                            </div>
+                          )}
+                          {selectedProgram.duration && (
+                            <div className="flex items-center gap-3">
+                              <Rocket className="w-5 h-5 text-kef-red" />
+                              <span className="text-muted-foreground">
+                                <strong>Duration:</strong> {selectedProgram.duration}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <Button 
                           className="bg-gradient-to-r from-kef-red to-kef-blue text-white border-0"
                           onClick={() => setIsApplyModalOpen(true)}
-                          data-testid={`button-apply-${program.id}`}
+                          data-testid={`button-apply-${selectedProgram.id}`}
                         >
                           Apply Now
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                       </div>
                       <div>
-                        <h3 className="font-semibold mb-6">What's Included</h3>
-                        <div className="grid gap-4">
-                          {program.features.map((feature, index) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                              <span className="text-muted-foreground">{feature}</span>
+                        {selectedProgram.benefits && selectedProgram.benefits.length > 0 && (
+                          <>
+                            <h3 className="font-semibold mb-6">What's Included</h3>
+                            <div className="grid gap-4">
+                              {selectedProgram.benefits.map((benefit, index) => (
+                                <div key={index} className="flex items-start gap-3">
+                                  <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                  <span className="text-muted-foreground">{benefit}</span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
-            ))}
-          </Tabs>
+              )}
+            </>
+          )}
         </div>
       </section>
 

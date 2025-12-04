@@ -275,7 +275,7 @@ export default function Admin() {
 
   const replyMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/email-reply', data);
+      const response = await apiRequest('POST', '/api/admin/email-reply', data);
       return response.json();
     },
     onSuccess: () => {

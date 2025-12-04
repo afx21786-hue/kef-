@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Sparkles, Users, Rocket } from 'lucide-react';
+import { ArrowRight, Users, Rocket, TrendingUp } from 'lucide-react';
 import heroImage from '@assets/generated_images/kef_hero_entrepreneurship_background.png';
 import AuthModal from '@/components/auth/AuthModal';
 
@@ -31,11 +31,6 @@ export default function HeroSection() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-8 animate-float">
-            <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-medium">Building Kerala's Startup Ecosystem</span>
-          </div>
-
           <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight">
             <span className="bg-gradient-to-r from-kef-red via-kef-blue to-kef-yellow bg-clip-text text-transparent">
               Where Kerala's
@@ -88,7 +83,7 @@ export default function HeroSection() {
           {[
             { icon: Rocket, label: 'Startups Supported', value: '2,000+', color: 'from-kef-red to-rose-600' },
             { icon: Users, label: 'Entrepreneurs Connected', value: '10,000+', color: 'from-kef-blue to-cyan-500' },
-            { icon: Sparkles, label: 'Funding Target', value: '₹100Cr+', color: 'from-kef-yellow to-orange-500' },
+            { icon: TrendingUp, label: 'Funding Target', value: '₹100Cr+', color: 'from-kef-yellow to-orange-500' },
           ].map((stat, index) => (
             <div 
               key={index}
