@@ -1,28 +1,38 @@
 import admin from 'firebase-admin';
 import type { RequestHandler } from 'express';
-import { storage } from './storage';
 
-const projectId = process.env.VITE_FIREBASE_PROJECT_ID || 'kerala-economic-form';
-
-let isInitialized = false;
-
-function initializeFirebase() {
-  if (isInitialized) return;
-  
+function ensureInitialized() {
   try {
-    admin.initializeApp({
-      projectId: projectId,
-    });
-    isInitialized = true;
+    admin.app();
+  } catch {
+    const projectId = process.env.VITE_FIREBASE_PROJECT_ID || 'kerala-economic-form';
+    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    
+    if (serviceAccountKey) {
+      try {
+        const serviceAccount = JSON.parse(serviceAccountKey);
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          projectId: projectId,
+        });
+      } catch (parseError) {
+        console.error('Failed to parse service account key:', parseError);
+        admin.initializeApp({ projectId: projectId });
+      }
+    } else {
+      admin.initializeApp({ projectId: projectId });
+    }
     console.log('Firebase Admin SDK initialized');
-  } catch (error) {
-    console.error('Failed to initialize Firebase Admin SDK:', error);
   }
 }
 
-initializeFirebase();
+export function getFirestoreDb() {
+  ensureInitialized();
+  return admin.firestore();
+}
 
 export async function verifyFirebaseToken(idToken: string): Promise<admin.auth.DecodedIdToken | null> {
+  ensureInitialized();
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     return decodedToken;
@@ -72,6 +82,7 @@ export const requireFirebaseAdmin: RequestHandler = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
     
+    const { storage } = await import('./storage');
     const dbUser = await storage.getUser(decodedToken.uid);
     
     if (!dbUser || dbUser.role !== "admin") {
