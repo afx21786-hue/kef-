@@ -15,7 +15,7 @@ function MetricCard({ metric, index, isVisible }: { metric: typeof metrics[0]; i
   return (
     <div
       ref={ref}
-      className={`group relative p-8 rounded-2xl bg-card border border-border text-center hover-elevate cursor-default transition-all duration-500 ${
+      className={`group relative p-6 rounded-2xl bg-card border border-border text-center hover-elevate cursor-default transition-all duration-500 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}
       style={{ transitionDelay: `${index * 100}ms` }}
@@ -23,15 +23,15 @@ function MetricCard({ metric, index, isVisible }: { metric: typeof metrics[0]; i
     >
       <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${metric.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
       
-      <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${metric.color} mb-6 group-hover:scale-110 transition-transform`}>
-        <metric.icon className="w-8 h-8 text-white" />
+      <div className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${metric.color} mb-4 group-hover:scale-110 transition-transform`}>
+        <metric.icon className="w-6 h-6 text-white" />
       </div>
       
-      <div className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+      <div className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent whitespace-nowrap">
         {count.toLocaleString()}{metric.suffix}
       </div>
       
-      <p className="text-muted-foreground">{metric.label}</p>
+      <p className="text-sm text-muted-foreground">{metric.label}</p>
     </div>
   );
 }
