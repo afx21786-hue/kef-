@@ -17,6 +17,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   upsertFirebaseUser(user: UpsertUser): Promise<User>;
   getUserCount(): Promise<number>;
+  updateUserRole(id: string, role: string): Promise<User | undefined>;
 
   getResources(): Promise<Resource[]>;
   getResource(id: string): Promise<Resource | undefined>;

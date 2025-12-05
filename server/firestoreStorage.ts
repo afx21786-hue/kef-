@@ -150,6 +150,19 @@ export class FirestoreStorage implements IStorage {
     return snapshot.data().count;
   }
 
+  async updateUserRole(id: string, role: string): Promise<User | undefined> {
+    const docRef = this.db.collection('users').doc(id);
+    const doc = await docRef.get();
+    if (!doc.exists) return undefined;
+    
+    await docRef.update({
+      role: role,
+      updatedAt: firestoreTimestamp(),
+    });
+    
+    return await this.getUser(id);
+  }
+
   async upsertFirebaseUser(userData: UpsertUser): Promise<User> {
     const id = userData.id!;
     const now = firestoreTimestamp();

@@ -44,6 +44,42 @@ export async function registerRoutes(
     return res.json({ isAdmin: req.session?.isAdmin === true });
   });
 
+  // Update user role - protected by admin session
+  app.patch('/api/admin/users/:id/role', isAdminSession, async (req: any, res) => {
+    try {
+      const { role } = req.body;
+      if (!role || !['admin', 'user'].includes(role)) {
+        return res.status(400).json({ error: "Invalid role. Must be 'admin' or 'user'" });
+      }
+      const user = await storage.updateUserRole(req.params.id, role);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ error: "Failed to update user role" });
+    }
+  });
+
+  // One-time bootstrap: Make a specific user admin (secured by password)
+  app.post('/api/bootstrap/make-admin', async (req: any, res) => {
+    try {
+      const { userId, password } = req.body;
+      if (password !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      const user = await storage.updateUserRole(userId, 'admin');
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error("Error in bootstrap:", error);
+      res.status(500).json({ error: "Failed to make user admin" });
+    }
+  });
+
   // Firebase user sync endpoint - secured with Firebase Auth
   app.post('/api/auth/sync', requireFirebaseAuth, async (req: any, res) => {
     try {
