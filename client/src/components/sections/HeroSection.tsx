@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { useScrollAnimation } from '@/lib/useScrollAnimation';
+import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Users, Rocket, TrendingUp } from 'lucide-react';
+import { ArrowRight, Users, Rocket, TrendingUp, LayoutDashboard } from 'lucide-react';
 import heroImage from '@assets/generated_images/kef_hero_entrepreneurship_background.png';
 import AuthModal from '@/components/auth/AuthModal';
 
@@ -10,6 +11,7 @@ export default function HeroSection() {
   const { ref, isVisible } = useScrollAnimation(0.1);
   const [, setLocation] = useLocation();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   return (
     <section 
@@ -45,15 +47,27 @@ export default function HeroSection() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-kef-red to-kef-blue text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-kef-red/25 hover:shadow-kef-red/40 transition-all border-0"
-              onClick={() => setIsAuthModalOpen(true)}
-              data-testid="button-hero-join"
-            >
-              Join the Forum
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            {isAuthenticated ? (
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-kef-red to-kef-blue text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-kef-red/25 hover:shadow-kef-red/40 transition-all border-0"
+                onClick={() => setLocation('/dashboard')}
+                data-testid="button-hero-dashboard"
+              >
+                Go to Dashboard
+                <LayoutDashboard className="ml-2 h-5 w-5" />
+              </Button>
+            ) : (
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-kef-red to-kef-blue text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-kef-red/25 hover:shadow-kef-red/40 transition-all border-0"
+                onClick={() => setIsAuthModalOpen(true)}
+                data-testid="button-hero-join"
+              >
+                Join the Forum
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            )}
             <Button 
               size="lg" 
               variant="outline"

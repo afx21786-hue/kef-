@@ -673,7 +673,11 @@ export async function registerRoutes(
 
       if (!emailResult.success) {
         console.error("Failed to send email:", emailResult.error);
-        return res.status(500).json({ error: `Failed to send email: ${emailResult.error}` });
+        // Provide a user-friendly message for common errors
+        const errorMessage = emailResult.error?.includes('not connected') 
+          ? 'Email service is not configured. Please set up Resend integration to send emails.'
+          : `Failed to send email: ${emailResult.error}`;
+        return res.status(500).json({ error: errorMessage });
       }
       
       // Store the reply record in the database
@@ -687,9 +691,12 @@ export async function registerRoutes(
       });
       
       res.status(201).json({ success: true, message: "Email sent successfully", reply, emailId: emailResult.id });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending email reply:", error);
-      res.status(500).json({ error: "Internal server error" });
+      const errorMessage = error?.message?.includes('not connected') || error?.message?.includes('Resend')
+        ? 'Email service is not configured. Please set up Resend integration to send emails.'
+        : 'Failed to send email. Please try again later.';
+      res.status(500).json({ error: errorMessage });
     }
   });
 

@@ -3,6 +3,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useAuth as useServerAuth } from '@/hooks/useAuth';
 import { logOut } from '@/lib/firebase';
 import { useLocation, Link } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,11 +17,10 @@ import {
   Rocket, 
   GraduationCap, 
   Trophy,
-  Bell,
-  Settings,
   ArrowRight,
   Shield
 } from 'lucide-react';
+import type { Program, Event } from '@shared/schema';
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -29,6 +29,14 @@ export default function Dashboard() {
   const { toast } = useToast();
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isAdvisoryModalOpen, setIsAdvisoryModalOpen] = useState(false);
+
+  const { data: programs = [] } = useQuery<Program[]>({
+    queryKey: ['/api/programs'],
+  });
+
+  const { data: events = [] } = useQuery<Event[]>({
+    queryKey: ['/api/events'],
+  });
 
   const handleLogout = async () => {
     const { error } = await logOut();
@@ -93,12 +101,6 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button variant="outline" size="icon">
-                <Bell className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="icon">
-                <Settings className="w-4 h-4" />
-              </Button>
               {isAdmin && (
                 <Link href="/admin">
                   <Button 
@@ -129,10 +131,10 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {[
-              { icon: Calendar, title: 'Upcoming Events', value: '3', color: 'from-kef-red to-rose-500' },
-              { icon: Rocket, title: 'Programs Enrolled', value: '2', color: 'from-kef-blue to-cyan-500' },
-              { icon: GraduationCap, title: 'Workshops Attended', value: '5', color: 'from-kef-yellow to-orange-500' },
-              { icon: Trophy, title: 'Achievements', value: '1', color: 'from-purple-500 to-pink-500' },
+              { icon: Calendar, title: 'Upcoming Events', value: String(events.filter(e => e.isActive).length), color: 'from-kef-red to-rose-500' },
+              { icon: Rocket, title: 'Active Programs', value: String(programs.filter(p => p.isActive).length), color: 'from-kef-blue to-cyan-500' },
+              { icon: GraduationCap, title: 'Total Programs', value: String(programs.length), color: 'from-kef-yellow to-orange-500' },
+              { icon: Trophy, title: 'KEF Member', value: '1', color: 'from-purple-500 to-pink-500' },
             ].map((stat, index) => (
               <Card key={index} className="border-border hover-elevate cursor-default">
                 <CardContent className="p-6">
@@ -151,26 +153,30 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-kef-red" />
-                  Your Upcoming Events
+                  Upcoming Events
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {[
-                  { title: 'Kerala Startup Fest 2025', date: 'Jan 15-16, 2025', status: 'Registered' },
-                  { title: 'Founder Roundtable', date: 'Feb 8, 2025', status: 'Waitlisted' },
-                  { title: 'Startup Boot Camp', date: 'Mar 1-3, 2025', status: 'Registered' },
-                ].map((event, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                    <div>
-                      <p className="font-medium">{event.title}</p>
-                      <p className="text-sm text-muted-foreground">{event.date}</p>
+                {events.filter(e => e.isActive).length > 0 ? (
+                  events.filter(e => e.isActive).slice(0, 3).map((event) => (
+                    <div key={event.id} className="flex items-center justify-between gap-2 p-4 rounded-lg bg-muted/50">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">{event.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {event.date ? new Date(event.date).toLocaleDateString('en-IN', { dateStyle: 'medium' }) : 'Date TBA'}
+                        </p>
+                      </div>
+                      <Badge variant="default">Active</Badge>
                     </div>
-                    <Badge variant={event.status === 'Registered' ? 'default' : 'secondary'}>
-                      {event.status}
-                    </Badge>
-                  </div>
-                ))}
-                <Button variant="outline" className="w-full">
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">No upcoming events</p>
+                )}
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setLocation('/events')}
+                >
                   View All Events
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -181,27 +187,23 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Rocket className="w-5 h-5 text-kef-blue" />
-                  Active Programs
+                  Available Programs
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {[
-                  { title: 'Entrepreneurship Accelerator', progress: 65, status: 'Week 8 of 12' },
-                  { title: 'KEF Student Forum', progress: 100, status: 'Active Member' },
-                ].map((program, index) => (
-                  <div key={index} className="p-4 rounded-lg bg-muted/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="font-medium">{program.title}</p>
-                      <span className="text-sm text-muted-foreground">{program.status}</span>
+                {programs.filter(p => p.isActive).length > 0 ? (
+                  programs.filter(p => p.isActive).slice(0, 3).map((program) => (
+                    <div key={program.id} className="p-4 rounded-lg bg-muted/50">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <p className="font-medium truncate">{program.title}</p>
+                        <Badge variant="secondary">{program.category || 'Program'}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{program.description}</p>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-kef-blue to-kef-yellow h-2 rounded-full transition-all"
-                        style={{ width: `${program.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">No active programs</p>
+                )}
                 <Button 
                   variant="outline" 
                   className="w-full"
