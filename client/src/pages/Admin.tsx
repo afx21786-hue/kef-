@@ -285,7 +285,10 @@ export default function Admin() {
       setDeleteConfirmOpen(false);
       setItemToDelete(null);
       if (variables.type === 'contact') {
-        queryClient.invalidateQueries({ queryKey: ['/api/contact/all'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/contact/all', { category: 'general' }] });
+        queryClient.invalidateQueries({ queryKey: ['/api/contact/all', { category: 'partnership' }] });
+        queryClient.invalidateQueries({ queryKey: ['/api/contact/all', { category: 'corporate' }] });
+        queryClient.invalidateQueries({ queryKey: ['/api/contact/all', { category: 'campus' }] });
       } else {
         queryClient.invalidateQueries({ queryKey: [`/api/forms/${variables.type}/all`] });
       }
