@@ -869,10 +869,12 @@ export class FirestoreStorage implements IStorage {
     
     if (category) {
       query = query.where('category', '==', category);
+    } else {
+      query = query.orderBy('createdAt', 'desc');
     }
     
-    const snapshot = await query.orderBy('createdAt', 'desc').get();
-    return snapshot.docs.map(doc => {
+    const snapshot = await query.get();
+    const results = snapshot.docs.map(doc => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -887,6 +889,16 @@ export class FirestoreStorage implements IStorage {
         createdAt: toDate(data.createdAt),
       };
     });
+    
+    if (category) {
+      results.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
+    }
+    
+    return results;
   }
 
   async createContactSubmission(submission: InsertContact): Promise<ContactSubmission> {
