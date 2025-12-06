@@ -7,8 +7,7 @@ import {
   type ConsultationSubmission, type InsertConsultation,
   type AdvisorySessionSubmission, type InsertAdvisorySession,
   type CampusInviteSubmission, type InsertCampusInvite,
-  type ContactSubmission, type InsertContact,
-  type EmailReply, type InsertEmailReply
+  type ContactSubmission, type InsertContact
 } from "@shared/schema";
 import { FirestoreStorage } from "./firestoreStorage";
 
@@ -46,29 +45,32 @@ export interface IStorage {
   getApplyFormSubmissions(): Promise<ApplyFormSubmission[]>;
   createApplyFormSubmission(submission: InsertApplyForm): Promise<ApplyFormSubmission>;
   updateApplyFormStatus(id: string, status: string, notes?: string): Promise<ApplyFormSubmission | undefined>;
+  deleteApplyFormSubmission(id: string): Promise<boolean>;
 
   getRegisterFormSubmissions(): Promise<RegisterFormSubmission[]>;
   createRegisterFormSubmission(submission: InsertRegisterForm): Promise<RegisterFormSubmission>;
   updateRegisterFormStatus(id: string, status: string, notes?: string): Promise<RegisterFormSubmission | undefined>;
+  deleteRegisterFormSubmission(id: string): Promise<boolean>;
 
   getConsultationSubmissions(): Promise<ConsultationSubmission[]>;
   createConsultationSubmission(submission: InsertConsultation): Promise<ConsultationSubmission>;
   updateConsultationStatus(id: string, status: string, notes?: string): Promise<ConsultationSubmission | undefined>;
+  deleteConsultationSubmission(id: string): Promise<boolean>;
 
   getAdvisorySessionSubmissions(): Promise<AdvisorySessionSubmission[]>;
   createAdvisorySessionSubmission(submission: InsertAdvisorySession): Promise<AdvisorySessionSubmission>;
   updateAdvisorySessionStatus(id: string, status: string, notes?: string): Promise<AdvisorySessionSubmission | undefined>;
+  deleteAdvisorySessionSubmission(id: string): Promise<boolean>;
 
   getCampusInviteSubmissions(): Promise<CampusInviteSubmission[]>;
   createCampusInviteSubmission(submission: InsertCampusInvite): Promise<CampusInviteSubmission>;
   updateCampusInviteStatus(id: string, status: string, notes?: string): Promise<CampusInviteSubmission | undefined>;
+  deleteCampusInviteSubmission(id: string): Promise<boolean>;
 
   getContactSubmissions(category?: string): Promise<ContactSubmission[]>;
   createContactSubmission(submission: InsertContact): Promise<ContactSubmission>;
   updateContactStatus(id: string, status: string, notes?: string): Promise<ContactSubmission | undefined>;
-
-  createEmailReply(reply: InsertEmailReply): Promise<EmailReply>;
-  getEmailReplies(submissionId: string, submissionType: string): Promise<EmailReply[]>;
+  deleteContactSubmission(id: string): Promise<boolean>;
 }
 
 export const storage: IStorage = new FirestoreStorage();

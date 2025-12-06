@@ -4,7 +4,6 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
 import { requireFirebaseAuth, requireFirebaseAdmin } from "./firebaseAdmin";
-import { sendEmail, formatReplyEmail } from "./email";
 import { 
   insertResourceSchema, insertProgramSchema, insertEventSchema, 
   insertMembershipPlanSchema, insertApplyFormSchema, insertRegisterFormSchema,
@@ -699,55 +698,62 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/email-reply", isAdminSession, async (req: any, res) => {
+  app.delete("/api/admin/forms/apply/:id", isAdminSession, async (req, res) => {
     try {
-      const { submissionId, submissionType, recipientEmail, subject, body } = req.body;
-      const userId = "admin";
-      
-      // Send the actual email via Resend
-      const htmlContent = formatReplyEmail(subject, body);
-      const emailResult = await sendEmail({
-        to: recipientEmail,
-        subject: subject,
-        html: htmlContent,
-        text: body,
-      });
-
-      if (!emailResult.success) {
-        console.error("Failed to send email:", emailResult.error);
-        // Provide a user-friendly message for common errors
-        const errorMessage = emailResult.error?.includes('not connected') 
-          ? 'Email service is not configured. Please set up Resend integration to send emails.'
-          : `Failed to send email: ${emailResult.error}`;
-        return res.status(500).json({ error: errorMessage });
-      }
-      
-      // Store the reply record in the database
-      const reply = await storage.createEmailReply({
-        submissionId,
-        submissionType,
-        recipientEmail,
-        subject,
-        body,
-        sentBy: userId,
-      });
-      
-      res.status(201).json({ success: true, message: "Email sent successfully", reply, emailId: emailResult.id });
-    } catch (error: any) {
-      console.error("Error sending email reply:", error);
-      const errorMessage = error?.message?.includes('not connected') || error?.message?.includes('Resend')
-        ? 'Email service is not configured. Please set up Resend integration to send emails.'
-        : 'Failed to send email. Please try again later.';
-      res.status(500).json({ error: errorMessage });
+      await storage.deleteApplyFormSubmission(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting apply form submission:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
-  app.get("/api/admin/email-replies/:submissionId/:submissionType", isAdminSession, async (req, res) => {
+  app.delete("/api/admin/forms/register/:id", isAdminSession, async (req, res) => {
     try {
-      const replies = await storage.getEmailReplies(req.params.submissionId, req.params.submissionType);
-      res.json(replies);
+      await storage.deleteRegisterFormSubmission(req.params.id);
+      res.json({ success: true });
     } catch (error) {
-      console.error("Error fetching email replies:", error);
+      console.error("Error deleting register form submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/forms/consultation/:id", isAdminSession, async (req, res) => {
+    try {
+      await storage.deleteConsultationSubmission(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting consultation submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/forms/advisory/:id", isAdminSession, async (req, res) => {
+    try {
+      await storage.deleteAdvisorySessionSubmission(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting advisory session submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/forms/campus-invite/:id", isAdminSession, async (req, res) => {
+    try {
+      await storage.deleteCampusInviteSubmission(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting campus invite submission:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/admin/contact/:id", isAdminSession, async (req, res) => {
+    try {
+      await storage.deleteContactSubmission(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting contact submission:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });

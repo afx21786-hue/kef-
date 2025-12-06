@@ -15,7 +15,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { logOut } from '@/lib/firebase';
 import AuthModal from '@/components/auth/AuthModal';
 import { useToast } from '@/hooks/use-toast';
-import kefLogo from '@assets/KEF__1_-removebg-preview_1764600424285.png';
+import kefLogo from '@assets/KEF__1_-removebg-preview_1765019748399.png';
 
 const navLinks = [
   { href: '/', label: 'Home' },

@@ -8,8 +8,7 @@ import {
   type ConsultationSubmission, type InsertConsultation,
   type AdvisorySessionSubmission, type InsertAdvisorySession,
   type CampusInviteSubmission, type InsertCampusInvite,
-  type ContactSubmission, type InsertContact,
-  type EmailReply, type InsertEmailReply
+  type ContactSubmission, type InsertContact
 } from "@shared/schema";
 import type { IStorage } from "./storage";
 
@@ -942,45 +941,33 @@ export class FirestoreStorage implements IStorage {
     };
   }
 
-  async createEmailReply(reply: InsertEmailReply): Promise<EmailReply> {
-    const id = generateId();
-    const now = firestoreTimestamp();
-    const setData = sanitizeForFirestore({
-      ...reply,
-      sentAt: now,
-    });
-    await this.db.collection('emailReplies').doc(id).set(setData);
-    const doc = await this.db.collection('emailReplies').doc(id).get();
-    const data = doc.data()!;
-    return {
-      id: doc.id,
-      submissionId: data.submissionId,
-      submissionType: data.submissionType,
-      recipientEmail: data.recipientEmail,
-      subject: data.subject,
-      body: data.body,
-      sentBy: data.sentBy,
-      sentAt: toDate(data.sentAt),
-    };
+  async deleteApplyFormSubmission(id: string): Promise<boolean> {
+    await this.db.collection('applyFormSubmissions').doc(id).delete();
+    return true;
   }
 
-  async getEmailReplies(submissionId: string, submissionType: string): Promise<EmailReply[]> {
-    const snapshot = await this.db.collection('emailReplies')
-      .where('submissionId', '==', submissionId)
-      .orderBy('sentAt', 'desc')
-      .get();
-    return snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        submissionId: data.submissionId,
-        submissionType: data.submissionType,
-        recipientEmail: data.recipientEmail,
-        subject: data.subject,
-        body: data.body,
-        sentBy: data.sentBy,
-        sentAt: toDate(data.sentAt),
-      };
-    });
+  async deleteRegisterFormSubmission(id: string): Promise<boolean> {
+    await this.db.collection('registerFormSubmissions').doc(id).delete();
+    return true;
+  }
+
+  async deleteConsultationSubmission(id: string): Promise<boolean> {
+    await this.db.collection('consultationSubmissions').doc(id).delete();
+    return true;
+  }
+
+  async deleteAdvisorySessionSubmission(id: string): Promise<boolean> {
+    await this.db.collection('advisorySessionSubmissions').doc(id).delete();
+    return true;
+  }
+
+  async deleteCampusInviteSubmission(id: string): Promise<boolean> {
+    await this.db.collection('campusInviteSubmissions').doc(id).delete();
+    return true;
+  }
+
+  async deleteContactSubmission(id: string): Promise<boolean> {
+    await this.db.collection('contactSubmissions').doc(id).delete();
+    return true;
   }
 }

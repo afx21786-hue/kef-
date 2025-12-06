@@ -49,7 +49,6 @@ import {
   Plus,
   Trash2,
   Edit,
-  Send,
   Loader2,
   LogOut,
   RefreshCw,
@@ -74,9 +73,9 @@ export default function Admin() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isReplyOpen, setIsReplyOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
-  const [replyData, setReplyData] = useState({ subject: '', body: '', recipientEmail: '', submissionId: '', submissionType: '' });
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ type: string; id: string } | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -273,28 +272,38 @@ export default function Admin() {
     },
   });
 
-  const replyMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/admin/email-reply', data);
+  const deleteSubmissionMutation = useMutation({
+    mutationFn: async ({ type, id }: { type: string; id: string }) => {
+      const endpoint = type === 'contact' 
+        ? `/api/admin/contact/${id}` 
+        : `/api/admin/forms/${type}/${id}`;
+      const response = await apiRequest('DELETE', endpoint);
       return response.json();
     },
-    onSuccess: () => {
-      toast({ title: "Success", description: "Reply sent successfully" });
-      setIsReplyOpen(false);
-      setReplyData({ subject: '', body: '', recipientEmail: '', submissionId: '', submissionType: '' });
+    onSuccess: (_, variables) => {
+      toast({ title: "Success", description: "Submission deleted successfully" });
+      setDeleteConfirmOpen(false);
+      setItemToDelete(null);
+      if (variables.type === 'contact') {
+        queryClient.invalidateQueries({ queryKey: ['/api/contact/all'] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: [`/api/forms/${variables.type}/all`] });
+      }
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
-  const handleReply = (email: string, id: string, type: string) => {
-    setReplyData({ subject: '', body: '', recipientEmail: email, submissionId: id, submissionType: type });
-    setIsReplyOpen(true);
+  const handleDeleteSubmission = (type: string, id: string) => {
+    setItemToDelete({ type, id });
+    setDeleteConfirmOpen(true);
   };
 
-  const sendReply = () => {
-    replyMutation.mutate(replyData);
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      deleteSubmissionMutation.mutate(itemToDelete);
+    }
   };
 
   if (isLoading) {
@@ -423,10 +432,11 @@ export default function Admin() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => handleReply(item.email, item.id, type)}
-                        data-testid={`button-reply-${item.id}`}
+                        className="text-destructive"
+                        onClick={() => handleDeleteSubmission(type, item.id)}
+                        data-testid={`button-delete-submission-${item.id}`}
                       >
-                        <Send className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -774,40 +784,24 @@ export default function Admin() {
         </Tabs>
       </div>
 
-      <Dialog open={isReplyOpen} onOpenChange={setIsReplyOpen}>
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Send Reply</DialogTitle>
+            <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>
-              Send an email reply to {replyData.recipientEmail}
+              Are you sure you want to delete this submission? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Subject</Label>
-              <Input
-                value={replyData.subject}
-                onChange={(e) => setReplyData({ ...replyData, subject: e.target.value })}
-                placeholder="Enter subject"
-                data-testid="input-reply-subject"
-              />
-            </div>
-            <div>
-              <Label>Message</Label>
-              <Textarea
-                value={replyData.body}
-                onChange={(e) => setReplyData({ ...replyData, body: e.target.value })}
-                placeholder="Enter your message..."
-                className="min-h-[150px]"
-                data-testid="input-reply-body"
-              />
-            </div>
-          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsReplyOpen(false)}>Cancel</Button>
-            <Button onClick={sendReply} disabled={replyMutation.isPending} data-testid="button-send-reply">
-              {replyMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-              Send Reply
+            <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete} 
+              disabled={deleteSubmissionMutation.isPending}
+              data-testid="button-confirm-delete"
+            >
+              {deleteSubmissionMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
