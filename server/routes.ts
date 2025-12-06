@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
 import { requireFirebaseAuth, requireFirebaseAdmin } from "./firebaseAdmin";
@@ -10,6 +11,17 @@ import {
   insertConsultationSchema, insertAdvisorySessionSchema, insertCampusInviteSchema,
   insertContactSchema
 } from "@shared/schema";
+
+const connectedClients = new Set<WebSocket>();
+
+export function broadcastMessage(type: string, data: any) {
+  const message = JSON.stringify({ type, data, timestamp: new Date().toISOString() });
+  connectedClients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '786954';
 
@@ -25,6 +37,36 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   await setupAuth(app);
+
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+  wss.on("connection", (ws: WebSocket) => {
+    console.log("WebSocket client connected");
+    connectedClients.add(ws);
+
+    ws.send(JSON.stringify({ type: "connected", message: "Connected to KEF WebSocket server" }));
+
+    ws.on("message", (message: string) => {
+      try {
+        const data = JSON.parse(message.toString());
+        console.log("WebSocket message received:", data);
+      } catch (error) {
+        console.error("Invalid WebSocket message:", error);
+      }
+    });
+
+    ws.on("close", () => {
+      console.log("WebSocket client disconnected");
+      connectedClients.delete(ws);
+    });
+
+    ws.on("error", (error) => {
+      console.error("WebSocket error:", error);
+      connectedClients.delete(ws);
+    });
+  });
+
+  console.log("WebSocket server initialized on /ws");
 
   app.post('/api/admin/login', (req: any, res) => {
     const { password } = req.body;
