@@ -919,8 +919,17 @@ function AdminItemForm({ activeTab, editingItem, onSubmit, isLoading }: {
               <Textarea
                 value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Program description"
+                placeholder="Short program description"
                 data-testid="input-description"
+              />
+            </div>
+            <div>
+              <Label>About this Program</Label>
+              <Textarea
+                value={formData.about || ''}
+                onChange={(e) => setFormData({ ...formData, about: e.target.value })}
+                placeholder="Detailed information about this program"
+                data-testid="input-about"
               />
             </div>
             <div>
@@ -930,6 +939,33 @@ function AdminItemForm({ activeTab, editingItem, onSubmit, isLoading }: {
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 placeholder="e.g., Accelerator, Bootcamp"
                 data-testid="input-category"
+              />
+            </div>
+            <div>
+              <Label>Date</Label>
+              <Input
+                value={formData.programDate || ''}
+                onChange={(e) => setFormData({ ...formData, programDate: e.target.value })}
+                placeholder="e.g., January 15, 2025"
+                data-testid="input-program-date"
+              />
+            </div>
+            <div>
+              <Label>Location</Label>
+              <Input
+                value={formData.location || ''}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                placeholder="e.g., Kochi, Kerala"
+                data-testid="input-location"
+              />
+            </div>
+            <div>
+              <Label>Fee</Label>
+              <Input
+                value={formData.fee || ''}
+                onChange={(e) => setFormData({ ...formData, fee: e.target.value })}
+                placeholder="e.g., Free, Rs. 5000"
+                data-testid="input-fee"
               />
             </div>
             <div>

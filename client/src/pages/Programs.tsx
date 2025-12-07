@@ -8,7 +8,10 @@ import {
   Rocket,
   Users,
   CheckCircle,
-  Loader2
+  Loader2,
+  Calendar,
+  MapPin,
+  Wallet
 } from 'lucide-react';
 import { ApplyFormModal, ConsultationModal } from '@/components/FormModals';
 import type { Program } from '@shared/schema';
@@ -128,11 +131,35 @@ export default function Programs() {
                           <p className="text-lg text-muted-foreground mb-6">{selectedProgram.category}</p>
                         )}
                         <p className="text-foreground leading-relaxed mb-6">
-                          {selectedProgram.description}
+                          {selectedProgram.about || selectedProgram.description}
                         </p>
                         <div className="space-y-3 mb-8">
+                          {selectedProgram.programDate && (
+                            <div className="flex items-center gap-3" data-testid="program-date">
+                              <Calendar className="w-5 h-5 text-kef-yellow" />
+                              <span className="text-muted-foreground">
+                                <strong>Date:</strong> {selectedProgram.programDate}
+                              </span>
+                            </div>
+                          )}
+                          {selectedProgram.location && (
+                            <div className="flex items-center gap-3" data-testid="program-location">
+                              <MapPin className="w-5 h-5 text-kef-red" />
+                              <span className="text-muted-foreground">
+                                <strong>Location:</strong> {selectedProgram.location}
+                              </span>
+                            </div>
+                          )}
+                          {selectedProgram.fee && (
+                            <div className="flex items-center gap-3" data-testid="program-fee">
+                              <Wallet className="w-5 h-5 text-emerald-500" />
+                              <span className="text-muted-foreground">
+                                <strong>Fee:</strong> {selectedProgram.fee}
+                              </span>
+                            </div>
+                          )}
                           {selectedProgram.eligibility && (
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3" data-testid="program-eligibility">
                               <Users className="w-5 h-5 text-kef-blue" />
                               <span className="text-muted-foreground">
                                 <strong>Eligibility:</strong> {selectedProgram.eligibility}
@@ -140,8 +167,8 @@ export default function Programs() {
                             </div>
                           )}
                           {selectedProgram.duration && (
-                            <div className="flex items-center gap-3">
-                              <Rocket className="w-5 h-5 text-kef-red" />
+                            <div className="flex items-center gap-3" data-testid="program-duration">
+                              <Rocket className="w-5 h-5 text-purple-500" />
                               <span className="text-muted-foreground">
                                 <strong>Duration:</strong> {selectedProgram.duration}
                               </span>
