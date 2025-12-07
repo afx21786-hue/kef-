@@ -915,21 +915,12 @@ function AdminItemForm({ activeTab, editingItem, onSubmit, isLoading }: {
               />
             </div>
             <div>
-              <Label>Description *</Label>
+              <Label>About this Program *</Label>
               <Textarea
                 value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Short program description"
-                data-testid="input-description"
-              />
-            </div>
-            <div>
-              <Label>About this Program</Label>
-              <Textarea
-                value={formData.about || ''}
-                onChange={(e) => setFormData({ ...formData, about: e.target.value })}
                 placeholder="Detailed information about this program"
-                data-testid="input-about"
+                data-testid="input-description"
               />
             </div>
             <div>
