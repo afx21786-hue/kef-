@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
+import { setupAuth, isAuthenticated, isAdmin } from "./firebaseAuth";
 import { requireFirebaseAuth, requireFirebaseAdmin } from "./firebaseAdmin";
 import { 
   insertResourceSchema, insertProgramSchema, insertEventSchema, 
@@ -154,6 +154,9 @@ export async function registerRoutes(
         role: isFirstUser ? "admin" : "user",
       });
       
+      // Set session userId for session-based auth checks
+      req.session.userId = uid;
+      
       res.json(user);
     } catch (error) {
       console.error("Error syncing Firebase user:", error);
@@ -185,7 +188,7 @@ export async function registerRoutes(
 
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
