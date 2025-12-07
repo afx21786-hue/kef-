@@ -103,9 +103,6 @@ export default function Navbar() {
                   data-testid={`link-nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                 >
                   {link.label}
-                  {location === link.href && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-kef-red to-kef-blue rounded-full" />
-                  )}
                 </Link>
               ))}
             </div>
